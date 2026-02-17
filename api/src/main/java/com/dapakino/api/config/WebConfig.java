@@ -9,13 +9,14 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // Applica a tutte le rotte
-                .allowedOrigins("http://localhost:5173",
-                                "http://127.0.0.1:5173",
-                                "https://da-pakino.vercel.app/"
-                ) // Autorizza il Frontend esplicitamente
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Autorizza tutti i metodi
-                .allowedHeaders("*") // Autorizza tutti gli header
+        registry.addMapping("/**")
+                .allowedOrigins(
+                        "http://localhost:5173",
+                        "http://127.0.0.1:5173",
+                        "https://da-pakino.vercel.app" // <--- AGGIUNGI ESATTAMENTE QUESTO
+                )
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
                 .allowCredentials(true);
     }
 }

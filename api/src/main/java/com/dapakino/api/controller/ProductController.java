@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
-// @CrossOrigin(origins = "*") <--- QUESTA RIGA VA CANCELLATA!
 public class ProductController {
 
     @Autowired
