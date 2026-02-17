@@ -12,10 +12,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins(
                         "http://localhost:5173",
-                        "http://127.0.0.1:5173",
-                        "https://da-pakino.vercel.app" // <--- AGGIUNGI ESATTAMENTE QUESTO
+                        "https://da-pakino.vercel.app" // Assicurati che sia il tuo URL Vercel esatto
                 )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // <--- DELETE DEVE ESSERCI
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
