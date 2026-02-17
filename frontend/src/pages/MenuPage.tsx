@@ -46,6 +46,7 @@ function MenuPage() {
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{error}</div>;
 
   return (
+        
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* HEADER */}
       <header className="bg-red-600 text-white p-4 shadow-md sticky top-0 z-10">
@@ -88,7 +89,12 @@ function MenuPage() {
             </button>
           ))}
         </div>
-
+          <div className="relative h-[300px] w-full overflow-hidden bg-red-700">
+            <img src="/logo_pakino.webp" alt="Da Pakino" className="w-full h-full object-contain p-4" />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
+              <p className="italic text-lg">"...sempre profumate con basilico fresco e olio extra vergine d'oliva."</p>
+            </div>
+          </div>
         {/* GRIGLIA PRODOTTI FILTRATI */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.map((product) => (
