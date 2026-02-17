@@ -1,23 +1,22 @@
-import type { CartItem } from "../context/CartContext";
+export const generateWhatsAppLink = (cart: any[], total: number) => {
+  const phoneNumber = "39XXXXXXXXXX"; // Inserisci il tuo numero reale qui
 
-export const generateWhatsAppLink = (cart: CartItem[], total: number) => {
-  const phoneNumber = "393331234567"; // ⚠️ METTI QUI IL TUO NUMERO (con 39 davanti)
-
-  // 1. Intestazione Messaggio
   let message = `*🍕 NUOVO ORDINE DA PAKINO 🍕*\n\n`;
 
-  // 2. Lista Prodotti
   cart.forEach((item) => {
-    message += `▫️ ${item.quantity}x *${item.name}* - €${(item.price * item.quantity).toFixed(2)}\n`;
+    // Gestione della stringa degli extra
+    const extrasText = item.selectedExtras && item.selectedExtras.length > 0
+      ? `\n   └ ➕ _Extra: ${item.selectedExtras.map((e: any) => e.name).join(', ')}_`
+      : '';
+
+    message += `▫️ ${item.quantity}x *${item.name}* ${extrasText}\n   Prezzo: €${(item.price * item.quantity).toFixed(2)}\n\n`;
   });
 
-  // 3. Totale
-  message += `\n*💰 TOTALE: €${total.toFixed(2)}*`;
-  message += `\n\n----------------------------\n`;
-  message += `📍 *Indirizzo di consegna:*\n(Scrivi qui il tuo indirizzo)`;
+  message += `*💰 TOTALE ORDINE: €${total.toFixed(2)}*\n`;
+  message += `\n----------------------------\n`;
+  message += `📍 *Indirizzo di consegna:*\n(Scrivi qui Via e Comune)\n`;
+  message += `⏰ *Orario desiderato:*\n(Scrivi l'ora)`;
 
-  // 4. Codifica per URL (trasforma spazi e a capo in %20, %0A ecc.)
   const encodedMessage = encodeURIComponent(message);
-
   return `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 };

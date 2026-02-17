@@ -5,6 +5,7 @@ import type { Product } from '../types/Product'; // Assicurati che questo import
 // Estendiamo il prodotto aggiungendo la quantità
 export interface CartItem extends Product {
   quantity: number;
+  selectedExtras: { name: string; price: number }[];
 }
 
 interface CartContextType {
@@ -45,7 +46,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       // Apre il carrello automaticamente quando aggiungi il primo prodotto
       setIsCartOpen(true); 
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, quantity: 1, selectedExtras: [] }];
     });
   };
 
