@@ -3,7 +3,7 @@ import { useCart } from "../context/CartContext";
 import { generateWhatsAppLink } from "../utils/whatsapp";
 
 export const CartSidebar = () => {
-  const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, cartTotal } = useCart();
+  const { cart, isCartOpen, setIsCartOpen, updateQuantity, cartTotal } = useCart();
 
   if (!isCartOpen) return null;
 

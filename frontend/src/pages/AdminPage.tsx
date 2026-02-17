@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Product, Category } from '../types/Product';
 import { Trash2, Plus, LogOut } from 'lucide-react';
 import { API_URL } from '../config';
