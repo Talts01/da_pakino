@@ -44,8 +44,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      // Apre il carrello automaticamente quando aggiungi il primo prodotto
-      setIsCartOpen(true); 
       return [...prev, { ...product, quantity: 1, selectedExtras: [] }];
     });
   };

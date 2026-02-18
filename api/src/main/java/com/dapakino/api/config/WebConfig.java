@@ -14,7 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://localhost:5173",
                         "https://da-pakino.vercel.app" // Assicurati che sia il tuo URL Vercel esatto
                 )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // <--- DELETE DEVE ESSERCI
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS") // <--- DELETE DEVE ESSERCI
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }

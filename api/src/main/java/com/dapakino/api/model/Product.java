@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "products")
-@Getter // <--- METTI QUESTO AL POSTO DI @Data
-@Setter // <--- METTI QUESTO AL POSTO DI @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -32,4 +32,7 @@ public class Product {
     private Category category;
 
     private boolean available;
+
+    // NUOVO CAMPO
+    private boolean isMonthlySpecial;
 }

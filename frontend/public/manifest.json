@@ -1,0 +1,16 @@
+{
+  "short_name": "Da Pakino",
+  "name": "Pizzeria Da Pakino",
+  "icons": [
+    {
+      "src": "logo-pakino.webp",
+      "sizes": "192x192 512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#e11d48",
+  "background_color": "#ffffff"
+}

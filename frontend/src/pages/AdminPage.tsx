@@ -1,217 +1,230 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Plus, Trash2, Edit2, LogOut, Pizza, 
+  CheckCircle2, XCircle, ChevronLeft, Save, X, Star
+} from 'lucide-react';
 import type { Product, Category } from '../types/Product';
-import { Trash2, Plus, LogOut } from 'lucide-react';
-import { API_URL } from '../config';
 
 export default function AdminPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
-  
-  // Dati per il form
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  // Stato del nuovo prodotto
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    description: '',
-    price: '',
-    imageUrl: '',
-    categoryId: '',
-    available: true
-  });
+  // STATI PER IL MODALE DI CREAZIONE/MODIFICA
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Partial<Product>>({});
+  
+  const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
-  // 1. LOGIN SEMPLIFICATO
-  const handleLogin = () => {
-    if (password === 'pizza123') { // 🔒 Password fissa per MVP
-      setIsAuthenticated(true);
-      loadData();
-    } else {
-      alert('Password errata!');
-    }
-  };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  // 2. CARICAMENTO DATI (Prodotti e Categorie)
-  const loadData = async () => {
+  const fetchData = async () => {
     try {
-      // Carichiamo Prodotti E Categorie dal server
       const [prodRes, catRes] = await Promise.all([
-        fetch(`${API_URL}/api/products`),
+        fetch(`${API_URL}/api/products?includeAll=true`),
         fetch(`${API_URL}/api/categories`)
       ]);
-
-      const prodData = await prodRes.json();
-      const catData = await catRes.json();
-
-      setProducts(prodData);
-      setCategories(catData); // Ora sono quelle vere del DB!
-    } catch (error) {
-      console.error("Errore caricamento dati:", error);
+      setProducts(await prodRes.json());
+      setCategories(await catRes.json());
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  // 3. SALVATAGGIO NUOVO PRODOTTO
-  const handleSubmit = async (e: React.FormEvent) => {
+  // APRE IL MODALE PER CREARE
+  const handleOpenCreate = () => {
+    setEditingProduct({ 
+      name: '', description: '', price: 0, available: true, isMonthlySpecial: false,
+      category: categories[0] // Default category
+    });
+    setIsModalOpen(true);
+  };
+
+  // APRE IL MODALE PER MODIFICARE
+  const handleOpenEdit = (product: Product) => {
+    setEditingProduct({ ...product });
+    setIsModalOpen(true);
+  };
+
+  // SALVATAGGIO (CREA O AGGIORNA)
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newProduct.categoryId) {
-        alert("Seleziona una categoria!");
-        return;
-    }
-
-    const payload = {
-        name: newProduct.name,
-        description: newProduct.description,
-        price: parseFloat(newProduct.price),
-        imageUrl: newProduct.imageUrl,
-        available: newProduct.available,
-        category: { id: parseInt(newProduct.categoryId) } // Il backend vuole un oggetto Category con ID
-    };
-
+    const method = editingProduct.id ? 'POST' : 'POST'; // Backend usa save() per entrambi, ma REST vorrebbe PUT. Usiamo POST come da controller attuale.
+    
     try {
-        const response = await fetch('http://localhost:8080/api/products', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-            alert('Prodotto aggiunto!');
-            loadData(); // Ricarica la lista
-            setNewProduct({ ...newProduct, name: '', description: '', price: '' }); // Resetta form
-        } else {
-            alert('Errore nel salvataggio');
-        }
-    } catch (error) {
-        console.error(error);
-        alert('Errore di connessione');
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-xl shadow-lg w-96">
-          <h1 className="text-2xl font-bold mb-4 text-center">Admin Login 🔒</h1>
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-2 border rounded mb-4"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button onClick={handleLogin} className="w-full bg-red-600 text-white py-2 rounded font-bold hover:bg-red-700">
-            Entra
-          </button>
-        </div>
-      </div>
-    );
-  }
-  const handleDelete = async (id: number) => {
-    if (!confirm("Sei sicuro di voler eliminare questa pizza?")) return;
-
-    try {
-      const response = await fetch(`http://localhost:8080/api/products/${id}`, {
-        method: 'DELETE',
+      const res = await fetch(`${API_URL}/api/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingProduct)
       });
 
-      if (response.ok) {
-        setProducts(products.filter(p => p.id !== id)); // Rimuovi dalla lista a schermo
-        alert("Pizza eliminata! 🗑️");
+      if (res.ok) {
+        setIsModalOpen(false);
+        fetchData(); // Ricarica tutto
+        alert("Prodotto salvato!");
       } else {
-        alert("Errore durante l'eliminazione");
+        alert("Errore salvataggio");
       }
-    } catch (error) {
-      console.error(error);
-      alert("Errore di connessione");
+    } catch (err) {
+      alert("Errore connessione");
     }
   };
 
+  const deleteProduct = async (id: number) => {
+    if (!confirm("Eliminare definitivamente?")) return;
+    await fetch(`${API_URL}/api/products/${id}`, { method: 'DELETE' });
+    fetchData();
+  };
+
+  const toggleAvailability = async (id: number) => {
+    await fetch(`${API_URL}/api/products/${id}/toggle-availability`, { method: 'PATCH' });
+    fetchData();
+  };
+
+  if (loading) return <div className="p-10 text-center">Caricamento...</div>;
+
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800">Pannello Gestione</h1>
-            <button onClick={() => setIsAuthenticated(false)} className="flex items-center gap-2 text-red-600 font-bold">
-                <LogOut size={20} /> Esci
-            </button>
+    <div className="min-h-screen bg-gray-50 font-sans pb-20">
+      
+      {/* HEADER */}
+      <header className="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-40">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate('/admin')} className="p-2 hover:bg-gray-100 rounded-full">
+            <ChevronLeft />
+          </button>
+          <div>
+            <h1 className="font-black uppercase text-xl">Menu Editor</h1>
+            <p className="text-xs text-gray-400 font-bold uppercase">Gestione Prodotti</p>
+          </div>
         </div>
+        <button 
+          onClick={handleOpenCreate}
+          className="bg-rose-600 hover:bg-rose-700 text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase flex items-center gap-2 shadow-lg shadow-rose-200"
+        >
+          <Plus size={18} /> Nuovo Prodotto
+        </button>
+      </header>
 
-        {/* MODULO AGGIUNTA PIZZA */}
-        <div className="bg-white p-6 rounded-xl shadow-md mb-8">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Plus className="text-green-600"/> Aggiungi Prodotto</h2>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input 
-                    placeholder="Nome Pizza (es: Capricciosa)" 
-                    className="p-2 border rounded"
-                    value={newProduct.name}
-                    onChange={e => setNewProduct({...newProduct, name: e.target.value})}
-                    required
-                />
-                <input 
-                    placeholder="Prezzo (es: 8.50)" 
-                    type="number" step="0.50"
-                    className="p-2 border rounded"
-                    value={newProduct.price}
-                    onChange={e => setNewProduct({...newProduct, price: e.target.value})}
-                    required
-                />
-                <select 
-                    className="p-2 border rounded"
-                    value={newProduct.categoryId}
-                    onChange={e => setNewProduct({...newProduct, categoryId: e.target.value})}
-                    required
-                >
-                    <option value="">Seleziona Categoria</option>
-                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-                <input 
-                    placeholder="URL Immagine (opzionale)" 
-                    className="p-2 border rounded"
-                    value={newProduct.imageUrl}
-                    onChange={e => setNewProduct({...newProduct, imageUrl: e.target.value})}
-                />
-                <textarea 
-                    placeholder="Descrizione ingredienti..." 
-                    className="p-2 border rounded col-span-1 md:col-span-2"
-                    value={newProduct.description}
-                    onChange={e => setNewProduct({...newProduct, description: e.target.value})}
-                />
-                <button type="submit" className="col-span-1 md:col-span-2 bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700">
-                    Salva Prodotto
-                </button>
-            </form>
-        </div>
-
-        {/* LISTA PRODOTTI ESISTENTI */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <table className="w-full text-left">
-                <thead className="bg-gray-100 text-gray-600 uppercase text-sm">
-                    <tr>
-                        <th className="p-4">Prodotto</th>
-                        <th className="p-4">Prezzo</th>
-                        <th className="p-4">Categoria</th>
-                        <th className="p-4 text-center">Azioni</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y">
-                    {products.map(p => (
-                        <tr key={p.id} className="hover:bg-gray-50">
-                            <td className="p-4 font-medium">{p.name}</td>
-                            <td className="p-4">€{p.price.toFixed(2)}</td>
-                            <td className="p-4"><span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{p.category.name}</span></td>
-                            <button 
-                                onClick={() => handleDelete(p.id)} 
-                                className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded transition-colors"
-                                title="Elimina"
-                                >
-                                <Trash2 size={20} />
-                                </button>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+      {/* TABELLA */}
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+          <table className="w-full text-left">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="p-6 text-xs text-gray-400 uppercase">Prodotto</th>
+                <th className="p-6 text-xs text-gray-400 uppercase">Cat</th>
+                <th className="p-6 text-xs text-gray-400 uppercase">Prezzo</th>
+                <th className="p-6 text-xs text-gray-400 uppercase">Stato</th>
+                <th className="p-6 text-xs text-gray-400 uppercase text-right">Azioni</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {products.map((p) => (
+                <tr key={p.id} className="hover:bg-gray-50/50 group">
+                  <td className="p-6">
+                    <div className="flex items-center gap-2">
+                      {p.isMonthlySpecial && <Star size={16} className="text-yellow-400 fill-yellow-400" />}
+                      <span className="font-bold text-gray-900">{p.name}</span>
+                    </div>
+                    <span className="text-xs text-gray-400 line-clamp-1">{p.description}</span>
+                  </td>
+                  <td className="p-6"><span className="bg-gray-100 px-2 py-1 rounded text-[10px] font-bold uppercase">{p.category.name}</span></td>
+                  <td className="p-6 font-black text-rose-600">€{p.price.toFixed(2)}</td>
+                  <td className="p-6">
+                    <button onClick={() => toggleAvailability(p.id)} className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full uppercase ${p.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {p.available ? 'Attivo' : 'Off'}
+                    </button>
+                  </td>
+                  <td className="p-6 text-right flex justify-end gap-2">
+                    <button onClick={() => handleOpenEdit(p)} className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"><Edit2 size={16} /></button>
+                    <button onClick={() => deleteProduct(p.id)} className="p-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100"><Trash2 size={16} /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
+
+      {/* MODALE DI CREAZIONE / MODIFICA */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-[2rem] p-8 max-w-lg w-full shadow-2xl relative">
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
+            
+            <h2 className="text-2xl font-black uppercase italic mb-6">
+              {editingProduct.id ? 'Modifica Prodotto' : 'Crea Prodotto'}
+            </h2>
+
+            <form onSubmit={handleSave} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase">Nome</label>
+                <input 
+                  type="text" required 
+                  className="w-full p-3 rounded-xl bg-gray-50 font-bold border-none focus:ring-2 focus:ring-rose-500"
+                  value={editingProduct.name || ''}
+                  onChange={e => setEditingProduct({...editingProduct, name: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase">Descrizione</label>
+                <textarea 
+                  className="w-full p-3 rounded-xl bg-gray-50 text-sm border-none focus:ring-2 focus:ring-rose-500"
+                  rows={3}
+                  value={editingProduct.description || ''}
+                  onChange={e => setEditingProduct({...editingProduct, description: e.target.value})}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-400 uppercase">Prezzo (€)</label>
+                  <input 
+                    type="number" step="0.50" required 
+                    className="w-full p-3 rounded-xl bg-gray-50 font-bold border-none focus:ring-2 focus:ring-rose-500"
+                    value={editingProduct.price || ''}
+                    onChange={e => setEditingProduct({...editingProduct, price: parseFloat(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-400 uppercase">Categoria</label>
+                  <select 
+                    className="w-full p-3 rounded-xl bg-gray-50 font-bold border-none focus:ring-2 focus:ring-rose-500"
+                    value={editingProduct.category?.id}
+                    onChange={e => {
+                      const cat = categories.find(c => c.id === parseInt(e.target.value));
+                      setEditingProduct({...editingProduct, category: cat});
+                    }}
+                  >
+                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* TOGGLE PIZZA DEL MESE */}
+              <div className="flex items-center gap-3 p-4 bg-yellow-50 rounded-xl border border-yellow-200 cursor-pointer" onClick={() => setEditingProduct({...editingProduct, isMonthlySpecial: !editingProduct.isMonthlySpecial})}>
+                <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${editingProduct.isMonthlySpecial ? 'bg-yellow-400 border-yellow-400' : 'border-gray-300 bg-white'}`}>
+                  {editingProduct.isMonthlySpecial && <CheckCircle2 size={16} className="text-white" />}
+                </div>
+                <div className="flex-1">
+                  <p className="font-black text-sm uppercase text-yellow-800">Pizza del Mese</p>
+                  <p className="text-[10px] text-yellow-600">Apparirà in alto con una stella ⭐</p>
+                </div>
+              </div>
+
+              <button type="submit" className="w-full py-4 bg-gray-900 text-white font-black rounded-xl uppercase hover:bg-rose-600 transition-colors flex justify-center gap-2">
+                <Save /> Salva Prodotto
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
