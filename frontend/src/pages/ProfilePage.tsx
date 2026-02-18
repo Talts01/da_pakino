@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { History, Pizza, RefreshCw, UserCircle, Save, Settings2, ReceiptText, ChevronRight } from 'lucide-react';
+import { History, RefreshCw, UserCircle, Save, Settings2, ReceiptText, ChevronRight } from 'lucide-react';
 import type { Order } from '../types/Order';
 import type { Product } from '../types/Product';
+// IMPORTIAMO IL FILE CSS APPENA CREATO
+import styles from './ProfilePage.module.css';
 
 export default function ProfilePage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -52,20 +54,15 @@ export default function ProfilePage() {
 
       if (res.ok) {
         const updatedUser = await res.json();
-        // 1. Aggiorna il localStorage
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        // 2. Aggiorna lo stato locale della pagina
         setUser(updatedUser);
-        
-        // 3. !!! IMPORTANTE: Scatena un evento per avvisare il carrello e la navbar
-        window.dispatchEvent(new Event('storage')); 
-        
-        alert("Profilo aggiornato! ✨");
+        window.dispatchEvent(new Event('storage'));
+        alert("Profilo aggiornato con successo! ✨");
       } else {
-        alert("Errore durante il salvataggio.");
+        alert("Errore durante il salvataggio. Riprova.");
       }
     } catch (err) {
-      alert("Errore di connessione.");
+      alert("Errore di connessione al server.");
     } finally {
       setIsUpdating(false);
     }
@@ -95,10 +92,11 @@ export default function ProfilePage() {
   if (loading) return <div className="p-20 text-center animate-pulse font-black text-gray-400">Caricamento... 🍕</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="bg-rose-600 px-6 py-12 rounded-b-[3rem] shadow-xl text-white mb-8">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-6">
-          <div className="bg-white/20 p-4 rounded-full backdrop-blur-md border border-white/30">
+    <div className={styles.container}>
+      {/* HEADER */}
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <div className={styles.avatarBox}>
             <UserCircle size={60} />
           </div>
           <div className="text-center md:text-left">
@@ -108,11 +106,11 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className={styles.gridContainer}>
         
         {/* MODIFICA ACCOUNT */}
-        <div className="lg:col-span-4">
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 sticky top-24">
+        <div className={styles.formColumn}>
+          <div className={styles.formCard}>
             <div className="flex items-center gap-2 mb-8">
               <div className="bg-rose-100 p-2 rounded-lg text-rose-600"><Settings2 size={20} /></div>
               <h2 className="text-sm font-black uppercase text-gray-900 tracking-widest">Dati Consegna ⚙️</h2>
@@ -120,28 +118,28 @@ export default function ProfilePage() {
             
             <form onSubmit={handleUpdateUser} className="space-y-5">
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Nome sul Citofono / Cognome 🏷️</label>
+                <label className={styles.inputLabel}>Nome sul Citofono / Cognome 🏷️</label>
                 <input 
                   type="text" 
-                  className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-5 py-4 text-sm font-bold focus:bg-white focus:border-rose-500 transition-all outline-none"
+                  className={styles.inputField}
                   value={formData.lastName}
                   onChange={(e) => setFormData({...formData, lastName: e.target.value})}
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Indirizzo 🏠</label>
+                <label className={styles.inputLabel}>Indirizzo 🏠</label>
                 <input 
                   type="text" 
-                  className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-5 py-4 text-sm font-bold focus:bg-white focus:border-rose-500 transition-all outline-none"
+                  className={styles.inputField}
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Telefono 📞</label>
+                <label className={styles.inputLabel}>Telefono 📞</label>
                 <input 
                   type="text" 
-                  className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-5 py-4 text-sm font-bold focus:bg-white focus:border-rose-500 transition-all outline-none"
+                  className={styles.inputField}
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 />
@@ -149,7 +147,7 @@ export default function ProfilePage() {
               <button 
                 type="submit"
                 disabled={isUpdating}
-                className="w-full py-5 bg-gray-900 text-white rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-rose-600 transition-all active:scale-95 flex items-center justify-center gap-2 mt-4"
+                className={styles.saveButton}
               >
                 {isUpdating ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
                 Salva Nuovi Dati
@@ -159,7 +157,7 @@ export default function ProfilePage() {
         </div>
 
         {/* STORICO ORDINI */}
-        <div className="lg:col-span-8">
+        <div className={styles.historyColumn}>
           <div className="flex items-center gap-2 mb-8 px-2">
             <History className="text-rose-600" size={24} />
             <h2 className="text-2xl font-black uppercase italic text-gray-900">Le tue serate Pizza 😋</h2>
@@ -167,9 +165,9 @@ export default function ProfilePage() {
 
           <div className="space-y-10">
             {historyOrders.map(order => (
-              <div key={order.id} className="bg-white rounded-[3rem] border border-gray-100 shadow-sm overflow-hidden group hover:shadow-xl transition-all duration-300">
+              <div key={order.id} className={styles.orderCard}>
                 <div className="p-8">
-                  <div className="flex justify-between items-start mb-6">
+                  <div className={styles.orderHeader}>
                     <div className="flex items-center gap-4">
                       <div className="bg-rose-50 p-4 rounded-2xl text-rose-600">
                         <ReceiptText size={24} />
@@ -183,17 +181,17 @@ export default function ProfilePage() {
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-black text-rose-600 italic">€{order.totalAmount.toFixed(2)}</div>
-                      <span className="text-[9px] font-black uppercase text-green-600 bg-green-50 px-2 py-1 rounded-md mt-2 inline-block border border-green-100">Successo ✨</span>
+                      <span className={styles.statusBadge}>Successo ✨</span>
                     </div>
                   </div>
                   
-                  <div className="bg-gray-50/70 rounded-[2rem] p-6 border-2 border-dashed border-gray-200 mb-6 relative">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-4 text-[9px] font-black text-gray-300 uppercase tracking-[0.3em]">
+                  {/* SCONTRINO */}
+                  <div className={styles.receiptContainer}>
+                    <div className={styles.receiptTag}>
                       Tagliando Consegna
                     </div>
                     <div className="space-y-4">
                       {order.orderDetails.split('\n').map((line, idx) => {
-                        // FILTRO: Togliamo le righe tecniche, compreso "Orario Richiesto"
                         if (line.includes('---') || 
                             line.includes('Cliente:') || 
                             line.includes('Indirizzo:') || 
@@ -204,9 +202,9 @@ export default function ProfilePage() {
                         
                         const isTotal = line.includes('TOTALE:');
                         return (
-                          <div key={idx} className={`flex justify-between items-center ${isTotal ? 'pt-4 border-t-2 border-gray-200 mt-2' : ''}`}>
+                          <div key={idx} className={`${styles.receiptRow} ${isTotal ? 'pt-4 border-t-2 border-gray-200 mt-2' : ''}`}>
                             <span className={`${isTotal ? 'font-black text-gray-900 text-sm' : 'font-bold text-gray-600 text-xs'} uppercase flex items-center gap-3`}>
-                              {!isTotal && <div className="w-1.5 h-1.5 bg-rose-400 rounded-full" />}
+                              {!isTotal && <ChevronRight size={12} className="text-rose-400" />}
                               {line.split('€')[0].replace(/^\d+x\s+/, (m) => `${m.trim()} x `)}
                             </span>
                             {line.includes('€') && (
@@ -220,7 +218,7 @@ export default function ProfilePage() {
 
                   <button 
                     onClick={() => handleReorder(order.orderDetails)}
-                    className="w-full py-5 rounded-2xl bg-gray-900 text-white font-black text-xs uppercase flex items-center justify-center gap-3 hover:bg-rose-600 transition-all active:scale-95 group/btn"
+                    className={styles.reorderButton}
                   >
                     <RefreshCw size={16} className="group-hover/btn:rotate-180 transition-transform duration-700" />
                     Ordina di nuovo 

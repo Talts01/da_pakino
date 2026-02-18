@@ -1,0 +1,68 @@
+.container {
+  @apply pb-20;
+}
+
+/* Hero Section Rossa */
+.hero {
+  @apply bg-rose-600 text-white p-6 pb-12 rounded-b-[2.5rem] shadow-xl relative overflow-hidden;
+}
+
+.heroContent {
+  @apply relative z-10 max-w-4xl mx-auto;
+}
+
+/* Barra di Ricerca */
+.searchWrapper {
+  @apply relative;
+}
+
+.searchInput {
+  @apply w-full pl-12 pr-4 py-4 rounded-2xl text-gray-900 placeholder-gray-400 shadow-lg border-none outline-none focus:ring-2 focus:ring-rose-300 transition-all;
+}
+
+/* Navigazione Categorie */
+.mainContent {
+  @apply max-w-7xl mx-auto px-4 -mt-6;
+}
+
+.categoryNav {
+  @apply flex gap-2 overflow-x-auto pb-4 pt-2;
+  scrollbar-width: none; /* Nasconde scrollbar Firefox */
+}
+.categoryNav::-webkit-scrollbar {
+  display: none; /* Nasconde scrollbar Chrome/Safari */
+}
+
+.catBtn {
+  @apply whitespace-nowrap px-6 py-3 rounded-xl font-bold text-sm shadow-sm transition-all;
+}
+
+.catBtnActive {
+  @apply bg-gray-900 text-white;
+}
+
+.catBtnInactive {
+  @apply bg-white text-gray-600 border;
+}
+
+/* Card Pizza Speciale */
+.specialCard {
+  @apply bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-[2.5rem] border-2 border-yellow-200 shadow-lg relative overflow-hidden group;
+}
+
+.specialTag {
+  @apply absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[10px] font-black px-4 py-2 rounded-bl-2xl uppercase tracking-widest;
+}
+
+/* Card Prodotto Normale */
+.productGrid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+.productCard {
+  @apply bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col justify-between group;
+}
+
+.addButton {
+  @apply bg-gray-900 hover:bg-rose-600 text-white p-3 rounded-xl shadow-lg transition-all transform active:scale-90;
+}

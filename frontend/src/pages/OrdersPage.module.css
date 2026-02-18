@@ -1,0 +1,42 @@
+.container {
+  @apply min-h-screen bg-gray-50 pb-20;
+}
+
+.header {
+  @apply bg-gray-900 text-white p-8 rounded-b-[3rem] shadow-xl mb-8;
+}
+
+.content {
+  @apply max-w-3xl mx-auto px-4;
+}
+
+.emptyState {
+  @apply text-center py-20 bg-white rounded-[3rem] border border-gray-100;
+}
+
+.orderCard {
+  @apply bg-white overflow-hidden rounded-[2.5rem] border border-gray-100 shadow-lg;
+}
+
+/* Banner di stato colorato */
+.statusBanner {
+  @apply p-4 flex items-center justify-between;
+}
+.statusSuccess {
+  @apply bg-green-50 text-green-700;
+}
+.statusActive {
+  @apply bg-rose-50 text-rose-700;
+}
+
+.cardBody {
+  @apply p-6;
+}
+
+.orderDetails {
+  @apply bg-gray-50 p-4 rounded-xl text-[11px] font-medium text-gray-600 whitespace-pre-wrap;
+}
+
+.kitchenAlert {
+  @apply mt-4 flex items-center gap-2 text-[10px] font-black text-amber-600 uppercase italic;
+}

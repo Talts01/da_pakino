@@ -1,0 +1,125 @@
+.container {
+  @apply min-h-screen bg-gray-50 font-sans pb-20;
+}
+
+/* Header Fisso */
+.header {
+  @apply bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-40;
+}
+
+.headerLeft {
+  @apply flex items-center gap-4;
+}
+
+.backButton {
+  @apply p-2 hover:bg-gray-100 rounded-full transition-colors;
+}
+
+.title {
+  @apply font-black uppercase text-xl;
+}
+
+.subtitle {
+  @apply text-xs text-gray-400 font-bold uppercase;
+}
+
+.newButton {
+  @apply bg-rose-600 hover:bg-rose-700 text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase flex items-center gap-2 shadow-lg shadow-rose-200 transition-all active:scale-95;
+}
+
+/* Tabella Prodotti */
+.content {
+  @apply max-w-6xl mx-auto p-6;
+}
+
+.tableContainer {
+  @apply bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden;
+}
+
+.tableHeader th {
+  @apply p-6 text-xs text-gray-400 uppercase text-left;
+}
+
+.tableRow {
+  @apply hover:bg-gray-50/50 transition-colors border-b border-gray-50 last:border-none;
+}
+
+.tableCell {
+  @apply p-6 align-middle;
+}
+
+.productName {
+  @apply font-bold text-gray-900;
+}
+
+.productDesc {
+  @apply text-xs text-gray-400 line-clamp-1 mt-1;
+}
+
+.categoryTag {
+  @apply bg-gray-100 px-2 py-1 rounded text-[10px] font-bold uppercase text-gray-600;
+}
+
+.priceTag {
+  @apply font-black text-rose-600;
+}
+
+.statusButton {
+  @apply flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full uppercase transition-colors;
+}
+.statusActive { @apply bg-green-100 text-green-700; }
+.statusInactive { @apply bg-red-100 text-red-700; }
+
+.actionButton {
+  @apply p-2 rounded-lg transition-colors ml-2;
+}
+.editBtn { @apply bg-blue-50 text-blue-600 hover:bg-blue-100; }
+.deleteBtn { @apply bg-rose-50 text-rose-600 hover:bg-rose-100; }
+
+/* Modale */
+.modalOverlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in;
+}
+
+.modalCard {
+  @apply bg-white rounded-[2rem] p-8 max-w-lg w-full shadow-2xl relative animate-in zoom-in-95 duration-200;
+}
+
+.closeButton {
+  @apply absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors;
+}
+
+.modalTitle {
+  @apply text-2xl font-black uppercase italic mb-6;
+}
+
+.formGroup {
+  @apply mb-4;
+}
+
+.label {
+  @apply block text-xs font-bold text-gray-400 uppercase mb-1 ml-1;
+}
+
+.input {
+  @apply w-full p-3 rounded-xl bg-gray-50 font-bold border-none focus:ring-2 focus:ring-rose-500 outline-none transition-all;
+}
+
+.textarea {
+  @apply w-full p-3 rounded-xl bg-gray-50 text-sm border-none focus:ring-2 focus:ring-rose-500 outline-none transition-all resize-none;
+}
+
+/* Toggle Speciale */
+.specialToggle {
+  @apply flex items-center gap-3 p-4 bg-yellow-50 rounded-xl border border-yellow-200 cursor-pointer hover:bg-yellow-100 transition-colors;
+}
+
+.checkbox {
+  @apply w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors;
+}
+.checkboxActive { @apply bg-yellow-400 border-yellow-400; }
+.checkboxInactive { @apply border-gray-300 bg-white; }
+
+.saveButton {
+  @apply w-full py-4 bg-gray-900 text-white font-black rounded-xl uppercase hover:bg-rose-600 transition-all flex justify-center gap-2 mt-6 shadow-lg active:scale-95;
+}

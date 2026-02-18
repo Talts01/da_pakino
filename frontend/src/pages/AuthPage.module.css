@@ -1,0 +1,63 @@
+.container {
+  @apply min-h-screen bg-gray-50 flex items-center justify-center p-4 py-12 font-sans;
+}
+
+.card {
+  @apply max-w-md w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100 transition-all;
+}
+
+/* Header Rosso */
+.header {
+  @apply bg-rose-600 p-8 text-center text-white;
+}
+
+.logoBox {
+  @apply bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm shadow-inner;
+}
+
+.title {
+  @apply text-3xl font-black uppercase tracking-tighter italic;
+}
+
+.subtitle {
+  @apply text-rose-100 text-xs mt-1 font-bold uppercase tracking-widest;
+}
+
+/* Form */
+.form {
+  @apply p-8 space-y-4;
+}
+
+.errorBox {
+  @apply bg-rose-50 text-rose-600 text-[10px] font-bold p-3 rounded-xl border border-rose-100 text-center uppercase animate-pulse;
+}
+
+.inputGroup {
+  @apply relative;
+}
+
+.inputIcon {
+  @apply absolute left-3 top-3.5 text-gray-400 pointer-events-none;
+}
+
+.input {
+  @apply w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-rose-500 outline-none text-sm font-bold text-gray-700 transition-all placeholder:font-normal;
+}
+
+.select {
+  @apply w-1/3 p-3 rounded-xl bg-gray-50 border border-transparent text-xs font-bold outline-none cursor-pointer;
+}
+
+/* Pulsante Azione */
+.submitButton {
+  @apply w-full bg-gray-900 hover:bg-rose-600 text-white font-black py-4 rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-95;
+}
+
+/* Footer Switch */
+.footer {
+  @apply p-6 bg-gray-50 text-center border-t border-gray-100;
+}
+
+.switchButton {
+  @apply text-gray-500 text-xs font-bold hover:text-rose-600 transition-colors uppercase tracking-widest;
+}
