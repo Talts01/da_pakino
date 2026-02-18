@@ -141,7 +141,7 @@ export default function AuthPage() {
             </>
           )}
 
-          <button type="submit" className={styles.submitButton}>
+          <button type="submit" className={`${styles.submitButton} group`}>
             <span>{isLogin ? 'ACCEDI' : 'REGISTRATI ORA'}</span>
             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </button>

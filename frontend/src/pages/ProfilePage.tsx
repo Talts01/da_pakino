@@ -165,7 +165,7 @@ export default function ProfilePage() {
 
           <div className="space-y-10">
             {historyOrders.map(order => (
-              <div key={order.id} className={styles.orderCard}>
+              <div key={order.id} className={`${styles.orderCard} group`}>
                 <div className="p-8">
                   <div className={styles.orderHeader}>
                     <div className="flex items-center gap-4">
@@ -217,12 +217,13 @@ export default function ProfilePage() {
                   </div>
 
                   <button 
-                    onClick={() => handleReorder(order.orderDetails)}
-                    className={styles.reorderButton}
-                  >
-                    <RefreshCw size={16} className="group-hover/btn:rotate-180 transition-transform duration-700" />
-                    Ordina di nuovo 
-                  </button>
+                      onClick={() => handleReorder(order.orderDetails)}
+                      // Aggiungi qui 'group/btn' manualmente
+                      className={`${styles.reorderButton} group/btn`} 
+                    >
+                      <RefreshCw size={16} className="group-hover/btn:rotate-180 transition-transform duration-700" />
+                      Ordina di nuovo 
+                    </button>
                 </div>
               </div>
             ))}

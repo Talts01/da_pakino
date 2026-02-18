@@ -47,7 +47,8 @@
 
 /* Card Pizza Speciale */
 .specialCard {
-  @apply bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-[2.5rem] border-2 border-yellow-200 shadow-lg relative overflow-hidden group;
+  /* Rimuovi 'group' da qui */
+  @apply bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-[2.5rem] border-2 border-yellow-200 shadow-lg relative overflow-hidden;
 }
 
 .specialTag {
@@ -60,7 +61,8 @@
 }
 
 .productCard {
-  @apply bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col justify-between group;
+  /* Rimuovi 'group' da qui */
+  @apply bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col justify-between;
 }
 
 .addButton {

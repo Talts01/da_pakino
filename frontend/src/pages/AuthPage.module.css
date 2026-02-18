@@ -50,9 +50,9 @@
 
 /* Pulsante Azione */
 .submitButton {
-  @apply w-full bg-gray-900 hover:bg-rose-600 text-white font-black py-4 rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-95;
+  /* Rimuovi 'group' */
+  @apply w-full bg-gray-900 hover:bg-rose-600 text-white font-black py-4 rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 active:scale-95;
 }
-
 /* Footer Switch */
 .footer {
   @apply p-6 bg-gray-50 text-center border-t border-gray-100;

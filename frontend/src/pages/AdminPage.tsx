@@ -118,7 +118,7 @@ export default function AdminPage() {
             </thead>
             <tbody>
               {products.map((p) => (
-                <tr key={p.id} className={styles.tableRow}>
+                <tr key={p.id} className={`${styles.tableRow} group`}>
                   <td className={styles.tableCell}>
                     <div className="flex items-center gap-2">
                       {p.isMonthlySpecial && <Star size={16} className="text-yellow-400 fill-yellow-400" />}

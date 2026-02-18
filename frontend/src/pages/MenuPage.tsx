@@ -115,7 +115,7 @@ export default function MenuPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {specialProducts.map((product) => (
-                <div key={product.id} className={styles.specialCard}>
+                <div key={product.id} className={`${styles.specialCard} group`}>
                   <div className={styles.specialTag}>
                     Consigliata ⭐
                   </div>
@@ -146,7 +146,7 @@ export default function MenuPage() {
               </h2>
               <div className={styles.productGrid}>
                 {productsInCategory.map((product) => (
-                  <div key={product.id} className={styles.productCard}>
+                  <div key={product.id} className={`${styles.productCard} group`}>
                     <div>
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="text-lg font-black text-gray-900 leading-tight uppercase italic">{product.name}</h3>
