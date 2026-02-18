@@ -59,7 +59,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
-  const clearCart = () => setCart([]);
+ const clearCart = () => {
+    setCart([]); // 1. Svuota lo stato React
+    localStorage.removeItem('cart'); // 2. FORZA la rimozione dal browser
+  };
 
   const cartTotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);

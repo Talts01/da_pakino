@@ -6,11 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 const logoSrc = "/logo-pakino.webp";
 
 export default function Navbar() {
-  const { cartCount, setIsCartOpen } = useCart();
+  const { cartCount, setIsCartOpen, clearCart } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Controlliamo se c'è un utente loggato
   const user = JSON.parse(localStorage.getItem('user') || 'null');
   
   const isAdmin = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen');
@@ -18,14 +17,16 @@ export default function Navbar() {
   if (isAdmin) return null;
 
   const handleLogout = () => {
-    // 1. Rimuoviamo i dati utente
+    // 1. Pulizia Utente
     localStorage.removeItem('user');
     localStorage.removeItem('isAdminAuthenticated');
     
-    // 2. Evento per aggiornare altri componenti che ascoltano lo storage
-    window.dispatchEvent(new Event('storage'));
+    // 2. Pulizia Carrello (Doppia Sicurezza)
+    clearCart(); // Pulisce lo stato del context
+    localStorage.removeItem('cart'); // Pulisce forzatamente la memoria del browser
     
-    // 3. Redirect alla home o login
+    // 3. Evento e Redirect
+    window.dispatchEvent(new Event('storage'));
     navigate('/auth');
   };
 
@@ -34,11 +35,11 @@ export default function Navbar() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
-      className="fixed top-0 left-0 right-0 bg-brand-cream/90 backdrop-blur-md z-40 py-3 px-4 md:px-6 border-b border-brand-dark/5 shadow-sm"
+      className="fixed top-0 left-0 right-0 bg-brand-cream/90 backdrop-blur-md z-50 py-3 px-4 md:px-6 border-b border-brand-dark/5 shadow-sm"
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         
-        {/* LOGO E BRAND */}
+        {/* LOGO */}
         <Link to="/" className="flex items-center gap-2 md:gap-3 group">
           <motion.img 
             whileHover={{ rotate: -5, scale: 1.1 }}
@@ -48,11 +49,11 @@ export default function Navbar() {
           />
           <div className="hidden md:block leading-tight">
             <h1 className="font-heading font-black text-brand-dark text-lg uppercase tracking-tight">Da Pakino</h1>
-            <p className="text-[10px] text-brand-dark/60 font-bold uppercase tracking-widest">Pizzeria D'asporto</p>
+            <p className="text-[10px] text-brand-dark/60 font-bold uppercase tracking-widest">Pizzeria & Grill</p>
           </div>
         </Link>
 
-        {/* LINK CENTRALI (Desktop) */}
+        {/* LINK CENTRALI */}
         <div className="hidden md:flex items-center gap-8 font-heading font-bold text-brand-dark/70 uppercase tracking-wider text-xs lg:text-sm">
           <NavLink to="/">Home</NavLink>
           <NavLink to="/menu">Menu</NavLink>
@@ -64,12 +65,11 @@ export default function Navbar() {
           
           {user ? (
             <>
-              {/* Tasto Profilo */}
+
               <Link to="/profile" className="p-2 md:p-3 bg-white rounded-full text-brand-dark shadow-sm hover:text-brand-red transition-colors" title="Profilo">
                 <User size={20} />
               </Link>
 
-              {/* TASTO LOGOUT (NUOVO) */}
               <button 
                 onClick={handleLogout}
                 className="p-2 md:p-3 bg-white rounded-full text-brand-dark/60 shadow-sm hover:bg-brand-red hover:text-white transition-colors"
@@ -79,13 +79,11 @@ export default function Navbar() {
               </button>
             </>
           ) : (
-            /* Se non è loggato mostra Accedi */
             <Link to="/auth" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-dark hover:text-brand-red transition-colors mr-2">
               <LogIn size={16} /> <span className="hidden md:inline">Accedi</span>
             </Link>
           )}
           
-          {/* BOTTONE CARRELLO */}
           <motion.button 
             onClick={() => setIsCartOpen(true)}
             whileTap={{ scale: 0.9 }}
@@ -116,7 +114,6 @@ export default function Navbar() {
   );
 }
 
-// Helper per i link attivi
 function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
   const location = useLocation();
   const isActive = location.pathname === to;

@@ -1,28 +1,65 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Phone, ArrowRight, Pizza } from 'lucide-react'; // Rimossi User e MapPin se non usati o riaggiunti se servono
-import styles from './AuthPage.module.css'
+import { Mail, Lock, User, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleLogin } from '@react-oauth/google';
+import PremiumButton from '../components/ui/PremiumButton';
+import styles from './AuthPage.module.css';
+
+const logoSrc = "/logo-pakino.webp";
 
 export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(true); // true = Accedi, false = Registrati
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Stati Form
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
   const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    address: '',
-    city: 'Vinovo',
-    phone: ''
-  });
-
-
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
+  // Gestione Login/Registrazione Classica
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+    const body = isLogin 
+      ? { email, password }
+      : { email, password, firstName, lastName }; // Aggiungiamo i nomi per la registrazione
+
+    try {
+      const res = await fetch(`${API_URL}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('user', JSON.stringify(data));
+        window.dispatchEvent(new Event('storage')); // Aggiorna Navbar
+        navigate('/'); // Vai alla Home
+      } else {
+        // Se il backend restituisce una stringa semplice o un oggetto errore
+        setError(typeof data === 'string' ? data : (data.message || 'Errore durante l\'operazione'));
+      }
+    } catch (err) {
+      setError("Impossibile connettersi al server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Gestione Google Login
   const handleGoogleSuccess = async (credentialResponse: any) => {
+    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/api/auth/google`, {
         method: 'POST',
@@ -33,168 +70,152 @@ export default function AuthPage() {
       if (res.ok) {
         const userData = await res.json();
         localStorage.setItem('user', JSON.stringify(userData));
-        navigate('/'); // Login riuscito
+        window.dispatchEvent(new Event('storage'));
+        navigate('/');
       } else {
-        setError("Errore login Google");
+        setError("Autenticazione Google fallita.");
       }
     } catch (err) {
-      setError("Errore connessione server");
-    }
-  };
-
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-    
-    try {
-      const response = await fetch(`${API_URL}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        localStorage.setItem('user', JSON.stringify(userData));
-        navigate('/'); 
-      } else {
-        const msg = await response.text();
-        setError(msg || 'Errore durante l\'autenticazione');
-      }
-    } catch (err) {
-      setError('Errore di connessione al server');
+      setError("Errore connessione server Google.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <motion.div 
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", duration: 0.8 }}
+        className={styles.card}
+      >
         
-        {/* Header */}
+        {/* HEADER */}
         <div className={styles.header}>
-          <div className={styles.logoBox}>
-            <Pizza size={32} />
-          </div>
-          <h2 className={styles.title}>
-            {isLogin ? 'Bentornato!' : 'Crea Account'}
-          </h2>
-          <p className={styles.subtitle}>
-            {isLogin ? 'Accedi per ordinare più velocemente' : 'Registrati per salvare il tuo indirizzo'}
-          </p>
+          <img src={logoSrc} alt="Logo" className={styles.logo} />
+          <h2 className={styles.title}>Benvenuto!</h2>
+          <p className={styles.subtitle}>Entra nel mondo del gusto autentico.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {error && (
-            <div className={styles.errorBox}>
-              {error}
-            </div>
-          )}
-          <div className="px-8 mt-6">
-           <p className="text-center text-xs font-bold text-gray-400 mb-4 uppercase">Oppure accedi con</p>
-           <div className="flex justify-center">
-             <GoogleLogin
-               onSuccess={handleGoogleSuccess}
-               onError={() => setError('Login fallito')}
-               theme="filled_black"
-               shape="pill"
-               text={isLogin ? "signin_with" : "signup_with"}
-             />
-           </div>
-           <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
-              <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-gray-400">O usa la mail</span></div>
-           </div>
-          </div>
-
-          {!isLogin && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className={styles.inputGroup}>
-                <input
-                  type="text" placeholder="Nome" required
-                  className={styles.input}
-                  style={{ paddingLeft: '1rem' }} // Override padding per input senza icona
-                  onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                />
-              </div>
-              <div className={styles.inputGroup}>
-                <input
-                  type="text" placeholder="Cognome" required
-                  className={styles.input}
-                  style={{ paddingLeft: '1rem' }}
-                  onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                />
-              </div>
-            </div>
-          )}
-
-          <div className={styles.inputGroup}>
-            <Mail size={16} className={styles.inputIcon} />
-            <input
-              type="email" placeholder="Email" required
-              className={styles.input}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-            />
-          </div>
-
-          <div className={styles.inputGroup}>
-            <Lock size={16} className={styles.inputIcon} />
-            <input
-              type="password" placeholder="Password" required
-              className={styles.input}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-            />
-          </div>
-
-          {!isLogin && (
-            <>
-              <div className="flex gap-2">
-                <select 
-                  className={styles.select}
-                  value={formData.city}
-                  onChange={(e) => setFormData({...formData, city: e.target.value})}
-                >
-                  <option value="Vinovo">Vinovo</option>
-                  <option value="Candiolo">Candiolo</option>
-                  <option value="La Loggia">La Loggia</option>
-                  <option value="Piobesi">Piobesi</option>
-                  <option value="Altro">Altro</option>
-                </select>
-                <input
-                  type="text" placeholder="Via e civico" required
-                  className={`${styles.input} flex-1`}
-                  style={{ paddingLeft: '1rem' }}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
-                />
-              </div>
-              <div className={styles.inputGroup}>
-                <Phone size={16} className={styles.inputIcon} />
-                <input
-                  type="tel" placeholder="Cellulare" required
-                  className={styles.input}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                />
-              </div>
-            </>
-          )}
-
-          <button type="submit" className={`${styles.submitButton} group`}>
-            <span>{isLogin ? 'ACCEDI' : 'REGISTRATI ORA'}</span>
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+        {/* TOGGLE SWITCH (ACCEDI / REGISTRATI) */}
+        <div className={styles.toggleContainer}>
+          <motion.div 
+            className={styles.toggleIndicator}
+            initial={false}
+            animate={{ 
+              left: isLogin ? '4px' : '50%', 
+              width: 'calc(50% - 4px)' 
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          />
+          <button onClick={() => { setIsLogin(true); setError(''); }} className={`${styles.toggleBtn} ${isLogin ? styles.toggleBtnActive : styles.toggleBtnInactive}`}>
+            Accedi
           </button>
+          <button onClick={() => { setIsLogin(false); setError(''); }} className={`${styles.toggleBtn} ${!isLogin ? styles.toggleBtnActive : styles.toggleBtnInactive}`}>
+            Registrati
+          </button>
+        </div>
+
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className={styles.formBody}>
+          
+          <AnimatePresence mode='popLayout'>
+            {/* CAMPI EXTRA PER REGISTRAZIONE */}
+            {!isLogin && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="grid grid-cols-2 gap-4 overflow-hidden"
+              >
+                <div className={`${styles.inputGroup} group`}>
+                  <User size={18} className={`${styles.inputIcon} group-focus-within:text-brand-gold`} />
+                  <input 
+                    type="text" placeholder="Nome" required={!isLogin}
+                    value={firstName} onChange={e => setFirstName(e.target.value)}
+                    className={styles.input}
+                  />
+                </div>
+                <div className={`${styles.inputGroup} group`}>
+                   {/* Icona nascosta o vuota per allineamento visivo se vuoi, o nessuna icona */}
+                   <input 
+                    type="text" placeholder="Cognome" required={!isLogin}
+                    value={lastName} onChange={e => setLastName(e.target.value)}
+                    className={`${styles.input} pl-4`} // Meno padding left perché senza icona
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* EMAIL */}
+          <div className={`${styles.inputGroup} group`}>
+            <Mail size={18} className={`${styles.inputIcon} group-focus-within:text-brand-gold`} />
+            <input 
+              type="email" placeholder="La tua email" required
+              value={email} onChange={e => setEmail(e.target.value)}
+              className={styles.input}
+            />
+          </div>
+
+          {/* PASSWORD */}
+          <div className={`${styles.inputGroup} group`}>
+            <Lock size={18} className={`${styles.inputIcon} group-focus-within:text-brand-gold`} />
+            <input 
+              type="password" placeholder="La tua password" required
+              value={password} onChange={e => setPassword(e.target.value)}
+              className={styles.input}
+            />
+          </div>
+
+          {/* ERRORE */}
+          <AnimatePresence>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                className={styles.errorMsg}
+              >
+                <AlertCircle size={16} /> {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* SUBMIT BUTTON */}
+          <PremiumButton type="submit" disabled={loading} className="w-full py-4 text-sm shadow-xl shadow-brand-red/20">
+            {loading ? <Loader2 className="animate-spin" /> : (
+              <span className="flex items-center gap-2">
+                {isLogin ? 'ACCEDI ORA' : 'CREA ACCOUNT'} <ArrowRight size={16} />
+              </span>
+            )}
+          </PremiumButton>
+
+          {/* GOOGLE LOGIN */}
+          <div className={styles.separator}>
+            <div className={styles.separatorLine}><div className="w-full border-t border-white/10"></div></div>
+            <span className={styles.separatorText}>Oppure continua con</span>
+          </div>
+
+          <div className={styles.googleBtnContainer}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError('Login Google fallito')}
+              theme="filled_black"
+              shape="circle" // O "pill" o "rectangular"
+              text={isLogin ? "signin_with" : "signup_with"}
+              width="300" // Larghezza fissa per centrarlo bene
+            />
+          </div>
+
         </form>
 
-        <div className={styles.footer}>
-          <button 
-            onClick={() => setIsLogin(!isLogin)}
-            className={styles.switchButton}
-          >
-            {isLogin ? 'Non hai un account? Registrati' : 'Hai già un account? Accedi'}
-          </button>
+        <div className="pb-8 text-center">
+           <button onClick={() => navigate('/')} className={styles.footerText}>
+             Torna alla Home senza accedere
+           </button>
         </div>
-      </div>
+
+      </motion.div>
     </div>
   );
 }
