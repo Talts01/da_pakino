@@ -1,42 +1,152 @@
 .container {
-  @apply min-h-screen bg-gray-50 pb-20;
+  @apply min-h-screen bg-brand-cream pb-24 pt-28 px-4 font-sans overflow-hidden;
 }
 
-.header {
-  @apply bg-gray-900 text-white p-8 rounded-b-[3rem] shadow-xl mb-8;
+/* Header */
+.headerSection {
+  @apply text-center mb-10 relative z-10;
 }
 
-.content {
-  @apply max-w-3xl mx-auto px-4;
+.headerTitle {
+  @apply text-4xl md:text-5xl font-heading font-black text-brand-dark uppercase italic tracking-tight mb-2;
 }
 
-.emptyState {
-  @apply text-center py-20 bg-white rounded-[3rem] border border-gray-100;
+.headerSubtitle {
+  @apply text-brand-dark/60 font-medium;
 }
 
-.orderCard {
-  @apply bg-white overflow-hidden rounded-[2.5rem] border border-gray-100 shadow-lg;
+/* Tab Switcher Elegante */
+.tabContainer {
+  @apply flex p-1 bg-white rounded-full shadow-sm border border-brand-dark/5 mb-12 max-w-md mx-auto relative;
 }
 
-/* Banner di stato colorato */
-.statusBanner {
-  @apply p-4 flex items-center justify-between;
+.tabButton {
+  @apply flex-1 py-3 text-xs font-bold uppercase tracking-widest relative z-10 transition-colors flex items-center justify-center gap-2;
 }
-.statusSuccess {
-  @apply bg-green-50 text-green-700;
-}
-.statusActive {
-  @apply bg-rose-50 text-rose-700;
+.tabActiveText { @apply text-white; }
+.tabInactiveText { @apply text-brand-dark/50 hover:text-brand-dark; }
+
+.tabIndicator {
+  @apply absolute top-1 bottom-1 bg-brand-dark rounded-full z-0 shadow-md;
 }
 
-.cardBody {
+/* === SEZIONE ORDINE ATTIVO (Tracker) === */
+.activeTrackerCard {
+  @apply bg-brand-dark text-white rounded-[2.5rem] p-8 shadow-xl shadow-brand-dark/20 relative overflow-hidden mb-8;
+}
+
+.trackerBgIcon {
+  @apply absolute -right-10 -bottom-10 opacity-5 text-brand-cream transform -rotate-12;
+}
+
+.trackerHeader {
+  @apply flex justify-between items-start mb-8 relative z-10;
+}
+
+.orderNumberBig {
+  @apply text-xs font-black uppercase tracking-widest text-brand-gold mb-1;
+}
+.orderStatusBig {
+  @apply text-3xl font-heading font-black italic;
+}
+
+.deliveryTimeBox {
+  @apply text-right;
+}
+.deliveryLabel {
+  @apply text-[10px] font-bold uppercase tracking-widest opacity-60;
+}
+.deliveryTimeValue {
+  @apply text-2xl font-black text-brand-red;
+}
+
+/* Barra di Progresso Visiva */
+.progressBarContainer {
+  @apply relative z-10 mb-8 px-4;
+}
+.progressTrack {
+  @apply h-3 bg-white/10 rounded-full overflow-hidden relative;
+}
+.progressFill {
+  @apply h-full bg-gradient-to-r from-brand-gold to-brand-red rounded-full relative;
+}
+.progressGlow {
+  @apply absolute inset-0 bg-white/30 blur-sm;
+}
+.progressIcons {
+  @apply flex justify-between text-brand-cream/40 mt-3 text-xs font-bold uppercase tracking-widest relative;
+}
+.progressIconActive {
+  @apply text-brand-gold scale-110 transition-all;
+}
+
+/* Dettagli Ordine Attivo */
+.activeDetails {
+  @apply bg-white/10 rounded-2xl p-6 relative z-10 backdrop-blur-sm border border-white/10;
+}
+
+/* === SEZIONE STORICO (Scontrini) === */
+.historyGrid {
+  @apply grid gap-6 max-w-2xl mx-auto;
+}
+
+/* Card Scontrino */
+.receiptCard {
+  @apply bg-white relative filter drop-shadow-lg transition-transform hover:-translate-y-1 duration-300;
+  /* Effetto Bordo Strappato (CSS Mask) */
+  mask-image: radial-gradient(circle at bottom, transparent 6px, black 6px);
+  mask-size: 16px 100%;
+  mask-position: bottom;
+  mask-repeat: repeat-x;
+  padding-bottom: 16px; /* Spazio per lo strappo */
+  border-radius: 1.5rem 1.5rem 0 0;
+}
+
+.receiptHeader {
+  @apply bg-brand-red p-4 text-center text-white rounded-t-[1.5rem] relative overflow-hidden;
+}
+
+.receiptPattern {
+  @apply absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==')] bg-fixed;
+}
+
+.receiptDate {
+  @apply relative z-10 font-heading font-black italic text-lg;
+}
+
+.receiptBody {
   @apply p-6;
 }
 
-.orderDetails {
-  @apply bg-gray-50 p-4 rounded-xl text-[11px] font-medium text-gray-600 whitespace-pre-wrap;
+.receiptOrderId {
+  @apply text-center text-xs font-bold uppercase tracking-widest text-brand-dark/40 mb-6;
 }
 
-.kitchenAlert {
-  @apply mt-4 flex items-center gap-2 text-[10px] font-black text-amber-600 uppercase italic;
+.receiptItems {
+  @apply space-y-3 mb-6;
+}
+
+.receiptItemRow {
+  @apply flex justify-between items-center text-sm font-bold text-brand-dark/80 border-b border-dashed border-brand-dark/10 pb-2;
+}
+
+.receiptQuantity {
+  @apply text-brand-red mr-2;
+}
+
+.receiptTotalSection {
+  @apply flex justify-between items-center pt-4 border-t-2 border-brand-dark/10;
+}
+
+.receiptTotalLabel {
+  @apply font-heading font-bold text-brand-dark uppercase;
+}
+
+.receiptTotalPrice {
+  @apply font-heading font-black text-2xl text-brand-red;
+}
+
+/* Empty State */
+.emptyState {
+  @apply text-center py-20 opacity-50 flex flex-col items-center;
 }

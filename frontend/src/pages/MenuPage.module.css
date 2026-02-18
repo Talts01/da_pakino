@@ -1,70 +1,215 @@
 .container {
-  @apply pb-20;
+  @apply pb-24 bg-brand-cream min-h-screen;
 }
 
-/* Hero Section Rossa */
+/* Hero Section */
 .hero {
-  @apply bg-rose-600 text-white p-6 pb-12 rounded-b-[2.5rem] shadow-xl relative overflow-hidden;
+  @apply relative bg-brand-dark text-brand-cream pt-32 pb-16 px-6 rounded-b-[3rem] overflow-hidden shadow-2xl;
+}
+
+.heroIconBg {
+  @apply absolute top-0 right-0 p-10 opacity-5;
 }
 
 .heroContent {
-  @apply relative z-10 max-w-4xl mx-auto;
+  @apply relative z-10 max-w-4xl mx-auto text-center;
 }
 
-/* Barra di Ricerca */
+.heroTitle {
+  @apply text-4xl md:text-6xl font-heading font-black mb-4;
+}
+
+.heroSubtitle {
+  @apply text-brand-cream/60 max-w-lg mx-auto mb-8 font-body;
+}
+
+/* Search Bar */
 .searchWrapper {
-  @apply relative;
+  @apply relative max-w-md mx-auto;
+}
+
+.searchIcon {
+  @apply absolute left-5 top-1/2 -translate-y-1/2 text-brand-dark/40;
 }
 
 .searchInput {
-  @apply w-full pl-12 pr-4 py-4 rounded-2xl text-gray-900 placeholder-gray-400 shadow-lg border-none outline-none focus:ring-2 focus:ring-rose-300 transition-all;
+  @apply w-full pl-14 pr-6 py-4 rounded-full bg-white text-brand-dark placeholder-brand-dark/30 shadow-xl focus:ring-4 focus:ring-brand-red/20 outline-none transition-all font-bold;
 }
 
-/* Navigazione Categorie */
-.mainContent {
-  @apply max-w-7xl mx-auto px-4 -mt-6;
+/* Sticky Nav */
+.stickyNav {
+  @apply sticky top-20 z-30 bg-brand-cream/95 backdrop-blur-sm py-4 border-b border-brand-dark/5 shadow-sm;
 }
 
-.categoryNav {
-  @apply flex gap-2 overflow-x-auto pb-4 pt-2;
-  scrollbar-width: none; /* Nasconde scrollbar Firefox */
+.navScrollContainer {
+  @apply max-w-7xl mx-auto px-4 overflow-x-auto;
+  scrollbar-width: none;
 }
-.categoryNav::-webkit-scrollbar {
-  display: none; /* Nasconde scrollbar Chrome/Safari */
+.navScrollContainer::-webkit-scrollbar {
+  display: none;
 }
 
+.navFlex {
+  @apply flex gap-3 pb-2;
+}
+
+/* Bottoni Categoria */
 .catBtn {
-  @apply whitespace-nowrap px-6 py-3 rounded-xl font-bold text-sm shadow-sm transition-all;
+  @apply relative whitespace-nowrap px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300;
 }
-
 .catBtnActive {
-  @apply bg-gray-900 text-white;
+  @apply text-white shadow-lg shadow-brand-red/30;
 }
-
 .catBtnInactive {
-  @apply bg-white text-gray-600 border;
+  @apply text-brand-dark/60 hover:bg-white hover:shadow-sm;
 }
 
-/* Card Pizza Speciale */
-.specialCard {
-  /* Rimuovi 'group' da qui */
-  @apply bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-[2.5rem] border-2 border-yellow-200 shadow-lg relative overflow-hidden;
+.activeIndicator {
+  @apply absolute inset-0 bg-brand-red rounded-full;
 }
 
-.specialTag {
-  @apply absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[10px] font-black px-4 py-2 rounded-bl-2xl uppercase tracking-widest;
+/* Contenuto Principale */
+.mainContent {
+  @apply max-w-7xl mx-auto px-4 mt-8 space-y-16; /* space-y-16 distanzia le sezioni */
 }
 
-/* Card Prodotto Normale */
+/* Sezione (Titolo + Griglia) */
+.sectionHeader {
+  @apply flex items-center gap-3 mb-6 px-2 border-b-2 border-brand-dark/5 pb-2 w-full md:w-fit;
+}
+
+.sectionTitle {
+  @apply text-2xl md:text-3xl font-heading font-black text-brand-dark uppercase italic tracking-tight;
+}
+
+.sectionCount {
+  @apply bg-brand-dark/10 text-brand-dark text-xs font-bold px-2 py-1 rounded-md;
+}
+
+/* Griglia Prodotti */
 .productGrid {
-  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10;
 }
 
+/* Speciali */
+.specialContainer {
+  @apply mb-12;
+}
+
+.specialHeader {
+  @apply flex items-center gap-2 mb-6 px-2;
+}
+
+.specialGrid {
+  @apply grid md:grid-cols-2 gap-8;
+}
+
+/* Product Card */
 .productCard {
-  /* Rimuovi 'group' da qui */
-  @apply bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col justify-between;
+  /* group è gestito nel TSX */
+  @apply bg-white rounded-[2rem] p-4 shadow-sm hover:shadow-premium transition-shadow duration-300 border border-brand-dark/5 flex flex-col h-full;
+}
+
+.imageContainer {
+  @apply relative h-48 rounded-[1.5rem] overflow-hidden mb-4 bg-brand-cream;
+}
+
+.productImage {
+  @apply w-full h-full object-cover transform transition-transform duration-700 ease-out; /* group-hover gestito nel TSX se necessario o qui */
+}
+/* Aggiungiamo l'hover effect nel CSS standard se group non va */
+.productCard:hover .productImage {
+  transform: scale(1.1);
+}
+
+.imageOverlay {
+  @apply absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity duration-300;
+}
+.productCard:hover .imageOverlay {
+  opacity: 1;
+}
+
+.cardContent {
+  @apply flex flex-col flex-grow;
+}
+
+.cardHeader {
+  @apply flex justify-between items-start mb-2;
+}
+
+.cardTitle {
+  @apply text-xl font-heading font-bold text-brand-dark leading-tight;
+}
+
+.cardPrice {
+  @apply text-lg font-bold text-brand-red font-body whitespace-nowrap ml-2;
+}
+
+.cardDesc {
+  @apply text-brand-dark/60 text-sm leading-relaxed mb-6 line-clamp-3 flex-grow;
+}
+
+.cardFooter {
+  @apply flex items-center justify-between pt-4 border-t border-brand-dark/5;
+}
+
+.catTag {
+  @apply text-[10px] uppercase font-bold tracking-widest text-brand-dark/40 bg-brand-dark/5 px-2 py-1 rounded-md;
 }
 
 .addButton {
-  @apply bg-gray-900 hover:bg-rose-600 text-white p-3 rounded-xl shadow-lg transition-all transform active:scale-90;
+  /* group/btn rimosso da apply */
+  @apply bg-brand-dark text-white p-3 rounded-xl shadow-lg hover:bg-brand-red transition-colors relative overflow-hidden;
+}
+
+.addIcon {
+  @apply relative z-10;
+}
+
+.btnShine {
+  @apply absolute inset-0 bg-white/20;
+}
+
+/* Special Card */
+.specialCard {
+  @apply relative bg-white rounded-[2.5rem] p-4 shadow-xl border-2 border-brand-gold/30 overflow-hidden flex flex-col md:flex-row gap-6;
+}
+
+.specialTag {
+  @apply absolute top-0 right-0 bg-brand-gold text-brand-dark text-xs font-black px-6 py-2 rounded-bl-2xl uppercase tracking-widest z-20;
+}
+
+.specialImageContainer {
+  @apply w-full md:w-1/2 h-56 md:h-auto rounded-[2rem] overflow-hidden relative;
+}
+
+.specialImage {
+  @apply w-full h-full object-cover transform transition-transform duration-700;
+}
+.specialCard:hover .specialImage {
+  transform: scale(1.05);
+}
+
+.specialContent {
+  @apply flex-1 py-4 pr-4 flex flex-col justify-center;
+}
+
+.specialTitle {
+  @apply text-3xl font-heading font-black text-brand-dark mb-2 italic;
+}
+
+.specialDesc {
+  @apply text-brand-dark/70 text-sm mb-6 leading-relaxed;
+}
+
+.specialFooter {
+  @apply flex items-center justify-between mt-auto;
+}
+
+.specialPrice {
+  @apply text-3xl font-black text-brand-red font-heading;
+}
+
+.specialAddBtn {
+  @apply bg-brand-red text-white px-8 py-4 rounded-xl font-bold uppercase tracking-wider shadow-lg shadow-brand-red/30 hover:bg-brand-redDark transition-colors flex items-center gap-2;
 }

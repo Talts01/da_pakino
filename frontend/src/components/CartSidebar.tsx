@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { X, ShoppingBag, Trash2, MapPin, Phone, User as UserIcon, Plus, Minus, Send, Clock, Loader2 } from 'lucide-react';
+import { X, ShoppingBag, Trash2, MapPin, Phone, User as UserIcon, Plus, Minus, Send, Clock, Loader2, UtensilsCrossed, Bike, Receipt } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import PremiumButton from './ui/PremiumButton';
 
 const DELIVERY_COSTS: Record<string, number> = {
   'Vinovo': 2.0,
@@ -32,21 +34,17 @@ export function CartSidebar() {
       const savedUser = localStorage.getItem('user');
       if (savedUser) {
         const user = JSON.parse(savedUser);
-        // Usiamo il lastName per il campo "Nome sul Citofono"
         setCustomerName(user.lastName || ''); 
         setAddress(user.address || '');
         setPhone(user.phone || '');
-        // Se hai altri campi come la città, caricali qui
       }
     };
 
-    // Carica i dati quando il carrello si apre
     if (isCartOpen) {
       loadUserData();
       fetchSlots();
     }
 
-    // Ascolta se i dati cambiano mentre il carrello è aperto (es. in un'altra scheda o via evento custom)
     window.addEventListener('storage', loadUserData);
     return () => window.removeEventListener('storage', loadUserData);
   }, [isCartOpen]);
@@ -60,7 +58,7 @@ export function CartSidebar() {
         setAvailableSlots(slots);
       }
     } catch (error) {
-      console.error("Errore caricamento slot:", error);
+      console.error("Errore slot:", error);
     } finally {
       setLoadingSlots(false);
     }
@@ -71,7 +69,7 @@ export function CartSidebar() {
 
   const handleCheckout = async () => {
     if (!customerName || !address || !phone || !selectedTime) {
-      alert("⚠️ Compila tutti i dati, incluso l'orario di consegna!");
+      alert("⚠️ Compila tutti i dati per la consegna!");
       return;
     }
 
@@ -79,7 +77,6 @@ export function CartSidebar() {
     const user = savedUser ? JSON.parse(savedUser) : null;
 
     if (!user) {
-      alert("Devi effettuare l'accesso per ordinare!");
       setIsCartOpen(false);
       navigate('/auth');
       return;
@@ -87,228 +84,216 @@ export function CartSidebar() {
 
     setIsSubmitting(true);
 
-    let orderDetailsText = `Cliente: ${customerName}\n`;
-    orderDetailsText += `Indirizzo: ${address} (${selectedCity})\n`;
-    orderDetailsText += `Tel: ${phone}\n`;
-    orderDetailsText += `Orario Richiesto: ${selectedTime}\n`;
-    orderDetailsText += `----------------------------\n`;
-
+    let orderDetailsText = `Cliente: ${customerName}\nIndirizzo: ${address} (${selectedCity})\nTel: ${phone}\nOrario: ${selectedTime}\n---\n`;
     cart.forEach((item) => {
-      const extrasText = item.selectedExtras && item.selectedExtras.length > 0
-        ? ` (Extra: ${item.selectedExtras.map((e: any) => e.name).join(', ')})`
-        : '';
-      orderDetailsText += `${item.quantity}x ${item.name}${extrasText}\n`;
+      const extras = item.selectedExtras?.length ? ` (+${item.selectedExtras.map((e: any) => e.name).join(',')})` : '';
+      orderDetailsText += `${item.quantity}x ${item.name}${extras}\n`;
     });
-    
-    orderDetailsText += `----------------------------\n`;
-    orderDetailsText += `Consegna: €${deliveryFee.toFixed(2)}\n`;
-    orderDetailsText += `TOTALE: €${grandTotal.toFixed(2)}`;
+    orderDetailsText += `---\nConsegna: €${deliveryFee.toFixed(2)}\nTOTALE: €${grandTotal.toFixed(2)}`;
 
     try {
       const response = await fetch(`${API_URL}/api/orders`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              user: { id: user.id },
-              // MODIFICA QUI: Tagliamo via i millisecondi e la 'Z' finale per evitare errori di parsing
-              orderDate: new Date().toISOString().slice(0, 19), 
-              deliveryTime: selectedTime,
-              totalAmount: grandTotal,
-              orderDetails: orderDetailsText,
-              status: 'INVIATO'
-            })
-          });
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user: { id: user.id },
+          orderDate: new Date().toISOString().slice(0, 19), 
+          deliveryTime: selectedTime,
+          totalAmount: grandTotal,
+          orderDetails: orderDetailsText,
+          status: 'INVIATO'
+        })
+      });
 
       if (response.ok) {
-        alert("✅ Ordine inviato con successo! Lo vedrai nella sezione 'I miei ordini'.");
         clearCart();
         setIsCartOpen(false);
         navigate('/orders');
-      } else {
-        alert("Errore nell'invio dell'ordine. Riprova.");
       }
     } catch (err) {
-      console.error("Errore DB:", err);
-      alert("Errore di connessione al server.");
+      alert("Errore invio ordine");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <>
-      {/* 1. PULSANTE FLUTTUANTE (Visibile solo se carrello chiuso) */}
-      {!isCartOpen && (
-        <button
-          onClick={() => setIsCartOpen(true)}
-          className="fixed bottom-6 right-6 z-50 bg-rose-600 hover:bg-gray-900 text-white p-4 rounded-full shadow-2xl transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center group"
-        >
-          <ShoppingBag size={28} strokeWidth={2.5} />
-          {cartCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-yellow-400 text-rose-900 text-xs font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
-              {cartCount}
-            </span>
-          )}
-        </button>
-      )}
+  // Varianti per l'animazione della sidebar
+  const sidebarVariants: Variants = {
+    closed: { x: "100%", opacity: 0 },
+    open: { x: 0, opacity: 1, transition: { type: "spring", stiffness: 300, damping: 30 } }
+  };
 
-      {/* 2. SIDEBAR (Visibile solo se carrello aperto) */}
+  return (
+    <AnimatePresence>
       {isCartOpen && (
-        <div className="fixed inset-0 z-[100] flex justify-end font-sans">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setIsCartOpen(false)} />
-          
-          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-            
-            <div className="p-6 bg-rose-600 text-white flex justify-between items-center shadow-lg">
-              <div className="flex items-center gap-2">
-                <ShoppingBag size={24} />
-                <h2 className="text-xl font-black uppercase italic tracking-tight">Il tuo Ordine</h2>
+        <>
+          {/* BACKDROP SFOCATO */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsCartOpen(false)}
+            className="fixed inset-0 bg-brand-dark/40 backdrop-blur-sm z-[100]"
+          />
+
+          {/* SIDEBAR */}
+          <motion.div 
+            variants={sidebarVariants}
+            initial="closed"
+            animate="open"
+            exit="closed"
+            className="fixed inset-y-0 right-0 z-[101] w-full max-w-md bg-white shadow-2xl flex flex-col font-sans"
+          >
+            {/* HEADER */}
+            <div className="bg-brand-red text-white p-6 shadow-md flex justify-between items-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-pattern opacity-10" /> 
+              <div className="flex items-center gap-3 relative z-10">
+                <ShoppingBag className="text-brand-gold" />
+                <h2 className="text-2xl font-heading font-black italic tracking-wide">Il Tuo Ordine</h2>
               </div>
-              <button onClick={() => setIsCartOpen(false)} className="hover:rotate-90 transition-transform p-1">
-                <X size={24} />
+              <button 
+                onClick={() => setIsCartOpen(false)}
+                className="p-2 hover:bg-white/20 rounded-full transition-colors relative z-10"
+              >
+                <X />
               </button>
             </div>
 
-            <div className="flex-grow overflow-y-auto p-6 space-y-4 bg-gray-50">
+            {/* LISTA PRODOTTI */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-brand-cream/30">
               {cart.length === 0 ? (
-                <div className="text-center py-20 text-gray-400 font-bold uppercase tracking-widest opacity-30">
-                  <ShoppingBag size={64} className="mx-auto mb-4" />
-                  <p>Il carrello è vuoto</p>
+                <div className="h-full flex flex-col items-center justify-center text-brand-dark/30 space-y-4">
+                  <UtensilsCrossed size={64} />
+                  <p className="font-heading text-xl font-bold">Il carrello è vuoto</p>
+                  <button onClick={() => setIsCartOpen(false)} className="text-brand-red underline font-bold text-sm">Torna al menu</button>
                 </div>
               ) : (
-                cart.map((item, index) => (
-                  <div key={`${item.id}-${index}`} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                    <div className="flex justify-between items-start">
+                <AnimatePresence mode='popLayout'>
+                  {cart.map((item) => (
+                    <motion.div 
+                      key={item.id}
+                      layout
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ x: -100, opacity: 0 }}
+                      className="bg-white p-4 rounded-2xl shadow-sm border border-brand-dark/5 flex gap-4"
+                    >
+                      <div className="flex flex-col items-center justify-between bg-brand-cream rounded-xl p-1 h-full">
+                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="p-1 hover:text-brand-red transition-colors"><Plus size={14} /></button>
+                        <span className="font-bold text-sm text-brand-dark">{item.quantity}</span>
+                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="p-1 hover:text-brand-red transition-colors"><Minus size={14} /></button>
+                      </div>
+
                       <div className="flex-1">
-                        <h3 className="font-black text-gray-900 uppercase text-xs tracking-tight">{item.name}</h3>
-                        {item.selectedExtras && item.selectedExtras.length > 0 && (
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {item.selectedExtras.map((extra: any, i: number) => (
-                              <span key={i} className="text-[9px] bg-green-100 text-green-700 px-2 py-0.5 rounded-md font-black">
-                                + {extra.name.toUpperCase()}
-                              </span>
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className="font-heading font-bold text-brand-dark text-lg leading-tight">{item.name}</h4>
+                          <span className="font-bold text-brand-red">€{(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                        {item.selectedExtras?.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {item.selectedExtras.map((ex: any, i: number) => (
+                              <span key={i} className="text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">+ {ex.name}</span>
                             ))}
                           </div>
                         )}
-                      </div>
-                      <p className="font-black text-rose-600 text-sm">€{(item.price * item.quantity).toFixed(2)}</p>
-                    </div>
-                    <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-                      <div className="flex items-center bg-gray-50 rounded-lg border border-gray-100 p-1">
-                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="p-1 hover:bg-white rounded-md text-rose-600">
-                          {item.quantity === 1 ? <Trash2 size={16} /> : <Minus size={16} />}
-                        </button>
-                        <span className="font-black w-6 text-center text-xs">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="p-1 hover:bg-white rounded-md text-green-600">
-                          <Plus size={16} />
+                        <button 
+                          onClick={() => removeFromCart(item.id)}
+                          className="text-xs text-brand-dark/40 hover:text-brand-red flex items-center gap-1 transition-colors mt-2"
+                        >
+                          <Trash2 size={12} /> Rimuovi
                         </button>
                       </div>
-                      <button onClick={() => removeFromCart(item.id)} className="text-gray-300 hover:text-rose-600 transition-colors">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                ))
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               )}
             </div>
 
+            {/* FORM DATI & TOTALE */}
             {cart.length > 0 && (
-              <div className="p-6 bg-white border-t space-y-3 shadow-inner">
-                <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-1 mb-1">
-                  <MapPin size={12} /> Riepilogo Consegna
-                </h3>
+              <div className="bg-white border-t border-brand-dark/5 p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-20">
                 
-                <div className="relative">
-                  <UserIcon size={14} className="absolute left-3 top-3.5 text-gray-400" />
-                  <input 
-                    type="text" placeholder="Nome sul citofono" value={customerName} 
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full pl-10 pr-3 py-3 rounded-xl bg-gray-50 border-none ring-1 ring-gray-200 focus:ring-2 focus:ring-rose-500 outline-none text-sm transition-all" 
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <select 
-                    value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)}
-                    className="w-1/3 p-3 rounded-xl bg-gray-50 border-none ring-1 ring-gray-200 focus:ring-2 focus:ring-rose-500 outline-none text-xs font-bold"
-                  >
-                    {Object.keys(DELIVERY_COSTS).map(city => <option key={city} value={city}>{city}</option>)}
-                  </select>
-                  <div className="relative flex-1">
-                    <MapPin size={14} className="absolute left-3 top-3.5 text-gray-400" />
+                {/* Dati Consegna Compact */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="relative col-span-2">
+                    <UserIcon size={16} className="absolute left-3 top-3.5 text-brand-dark/30" />
                     <input 
-                      type="text" placeholder="Via e civico" value={address} 
-                      onChange={(e) => setAddress(e.target.value)}
-                      className="w-full pl-10 pr-3 py-3 rounded-xl bg-gray-50 border-none ring-1 ring-gray-200 focus:ring-2 focus:ring-rose-500 outline-none text-sm" 
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <div className="relative w-1/2">
-                    <Phone size={14} className="absolute left-3 top-3.5 text-gray-400" />
-                    <input 
-                      type="text" placeholder="Telefono" value={phone} 
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full pl-10 pr-3 py-3 rounded-xl bg-gray-50 border-none ring-1 ring-gray-200 focus:ring-2 focus:ring-rose-500 outline-none text-sm" 
+                      type="text" placeholder="Nome sul citofono" value={customerName} onChange={e => setCustomerName(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-brand-cream border-none focus:ring-2 focus:ring-brand-red/20 outline-none text-sm font-bold text-brand-dark placeholder:font-normal"
                     />
                   </div>
                   
-                  <div className="relative w-1/2">
-                    <Clock size={14} className="absolute left-3 top-3.5 text-gray-400" />
-                    <select
-                      value={selectedTime}
-                      onChange={(e) => setSelectedTime(e.target.value)}
-                      className="w-full pl-10 pr-3 py-3 rounded-xl bg-gray-50 border-none ring-1 ring-gray-200 focus:ring-2 focus:ring-rose-500 outline-none text-sm appearance-none font-bold text-gray-700"
+                  <div className="relative col-span-2 flex gap-2">
+                     <select 
+                        value={selectedCity} onChange={e => setSelectedCity(e.target.value)}
+                        className="w-1/3 p-3 rounded-xl bg-brand-cream border-none font-bold text-xs outline-none cursor-pointer"
+                      >
+                        {Object.keys(DELIVERY_COSTS).map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                      <div className="relative flex-1">
+                        <MapPin size={16} className="absolute left-3 top-3.5 text-brand-dark/30" />
+                        <input 
+                          type="text" placeholder="Via e Civico" value={address} onChange={e => setAddress(e.target.value)}
+                          className="w-full pl-10 pr-4 py-3 rounded-xl bg-brand-cream border-none focus:ring-2 focus:ring-brand-red/20 outline-none text-sm font-bold placeholder:font-normal"
+                        />
+                      </div>
+                  </div>
+
+                  <div className="relative">
+                    <Phone size={16} className="absolute left-3 top-3.5 text-brand-dark/30" />
+                    <input 
+                      type="tel" placeholder="Telefono" value={phone} onChange={e => setPhone(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-brand-cream border-none focus:ring-2 focus:ring-brand-red/20 outline-none text-sm font-bold placeholder:font-normal"
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <Clock size={16} className="absolute left-3 top-3.5 text-brand-dark/30" />
+                    <select 
+                      value={selectedTime} onChange={e => setSelectedTime(e.target.value)}
                       disabled={loadingSlots}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-brand-cream border-none focus:ring-2 focus:ring-brand-red/20 outline-none text-sm font-bold text-brand-dark appearance-none"
                     >
                       <option value="">Orario...</option>
-                      {availableSlots.map(slot => (
-                        <option key={slot} value={slot}>{slot}</option>
-                      ))}
+                      {availableSlots.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                 </div>
-              </div>
-            )}
 
-            {cart.length > 0 && (
-              <div className="p-8 border-t bg-gray-50 space-y-4">
-                <div className="space-y-1">
-                  <div className="flex justify-between text-gray-400 font-bold uppercase text-[10px] tracking-widest">
-                    <span>Pizze</span>
-                    <span>€{cartTotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-400 font-bold uppercase text-[10px] tracking-widest">
-                    <span>Consegna</span>
-                    <span>€{deliveryFee.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-2xl font-black text-gray-900 pt-3 border-t border-gray-200">
-                    <span className="italic">TOTALE</span>
-                    <span className="text-rose-600">€{grandTotal.toFixed(2)}</span>
-                  </div>
+                {/* --- NUOVA SEZIONE: RIEPILOGO COSTI --- */}
+                <div className="mt-6 mb-4 space-y-2 border-t border-brand-dark/5 pt-4">
+                   <div className="flex justify-between items-center text-sm font-bold text-brand-dark/50">
+                      <span className="flex items-center gap-2"><Receipt size={14}/> Subtotale Prodotti</span>
+                      <span>€{cartTotal.toFixed(2)}</span>
+                   </div>
+                   
+                   <div className="flex justify-between items-center text-sm font-bold text-brand-dark">
+                      <span className="flex items-center gap-2 text-brand-dark">
+                        <Bike size={14} className="text-brand-red" /> 
+                        Consegna a {selectedCity}
+                      </span>
+                      <span className="text-brand-red">+ €{deliveryFee.toFixed(2)}</span>
+                   </div>
                 </div>
-                
-                <button 
-                  onClick={handleCheckout}
-                  disabled={!selectedTime || isSubmitting}
-                  className={`w-full font-black py-5 rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95 group ${
-                    !selectedTime || isSubmitting
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                    : 'bg-green-500 hover:bg-green-600 text-white'
-                  }`}
+
+                {/* Totale Finale e Bottone */}
+                <div className="flex justify-between items-end mb-4 pt-2 border-t border-brand-dark/10 border-dashed">
+                  <div className="text-sm text-brand-dark/50 font-bold uppercase tracking-widest">Totale Ordine</div>
+                  <div className="text-3xl font-heading font-black text-brand-red">€{grandTotal.toFixed(2)}</div>
+                </div>
+
+                <PremiumButton 
+                  onClick={handleCheckout} 
+                  disabled={isSubmitting}
+                  className="w-full py-5 text-lg shadow-xl shadow-brand-red/20"
                 >
-                  {isSubmitting ? (
-                    <><Loader2 className="animate-spin" size={20} /> Invio in corso...</>
-                  ) : (
-                    <><Send size={20} className={selectedTime ? "group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" : ""} /> <span className="text-lg uppercase">Invia Ordine</span></>
-                  )}
-                </button>
+                  {isSubmitting ? <Loader2 className="animate-spin" /> : <><Send size={20} /> INVIA ORDINE</>}
+                </PremiumButton>
               </div>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </>
       )}
-    </>
+    </AnimatePresence>
   );
 }

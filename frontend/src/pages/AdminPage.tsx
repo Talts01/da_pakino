@@ -50,19 +50,29 @@ export default function AdminPage() {
     setIsModalOpen(true);
   };
 
+  // SALVATAGGIO (CREA O AGGIORNA)
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Se c'è un ID, stiamo modificando (PUT), altrimenti creando (POST)
+    const isEditing = !!editingProduct.id;
+    const url = isEditing 
+      ? `${API_URL}/api/products/${editingProduct.id}` 
+      : `${API_URL}/api/products`;
+    
+    const method = isEditing ? 'PUT' : 'POST';
+    
     try {
-      const res = await fetch(`${API_URL}/api/products`, {
-        method: 'POST',
+      const res = await fetch(url, {
+        method: method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingProduct)
       });
 
       if (res.ok) {
         setIsModalOpen(false);
-        fetchData(); 
-        alert("Prodotto salvato!");
+        fetchData();
+        alert(isEditing ? "Prodotto aggiornato!" : "Prodotto creato!");
       } else {
         alert("Errore salvataggio");
       }

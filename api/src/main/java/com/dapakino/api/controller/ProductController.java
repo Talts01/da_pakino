@@ -10,19 +10,17 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
-// Aggiungi CORS se necessario qui o globalmente come hai già fatto in WebConfig
 public class ProductController {
 
     @Autowired
     private ProductRepository productRepository;
 
-    // MODIFICA: Aggiungiamo un parametro per decidere se vedere tutto o solo i disponibili
     @GetMapping
     public List<Product> getAllProducts(@RequestParam(required = false, defaultValue = "false") boolean includeAll) {
         if (includeAll) {
-            return productRepository.findAll(); // Per l'Admin
+            return productRepository.findAll();
         }
-        return productRepository.findByAvailableTrue(); // Per il Menu pubblico
+        return productRepository.findByAvailableTrue();
     }
 
     @PostMapping
@@ -30,7 +28,27 @@ public class ProductController {
         return productRepository.save(product);
     }
 
-    // NUOVO ENDPOINT: Per cambiare lo stato di disponibilità (Toggle)
+    // --- AGGIUNGI QUESTO METODO PUT PER L'AGGIORNAMENTO ---
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
+        return productRepository.findById(id).map(product -> {
+            product.setName(productDetails.getName());
+            product.setDescription(productDetails.getDescription());
+            product.setPrice(productDetails.getPrice());
+            product.setCategory(productDetails.getCategory());
+            product.setAvailable(productDetails.isAvailable());
+
+            // IMPORTANTE: Aggiorniamo esplicitamente il campo speciale
+            product.setMonthlySpecial(productDetails.isMonthlySpecial());
+
+            if(productDetails.getImageUrl() != null) {
+                product.setImageUrl(productDetails.getImageUrl());
+            }
+
+            return ResponseEntity.ok(productRepository.save(product));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @PatchMapping("/{id}/toggle-availability")
     public ResponseEntity<Product> toggleAvailability(@PathVariable Long id) {
         return productRepository.findById(id).map(product -> {

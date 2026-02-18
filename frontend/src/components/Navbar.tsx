@@ -1,102 +1,137 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Pizza, LogOut, UserCircle, ClipboardList } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { ShoppingBag, User, Package, LogOut, LogIn } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const logoSrc = "/logo-pakino.webp";
 
 export default function Navbar() {
+  const { cartCount, setIsCartOpen } = useCart();
+  const location = useLocation();
   const navigate = useNavigate();
   
-  // Recuperiamo i dati dell'utente dal localStorage
+  // Controlliamo se c'è un utente loggato
   const user = JSON.parse(localStorage.getItem('user') || 'null');
-  const isAdmin = localStorage.getItem('isAdminAuthenticated') === 'true';
+  
+  const isAdmin = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen');
+
+  if (isAdmin) return null;
 
   const handleLogout = () => {
-    // Rimuoviamo i dati di sessione
+    // 1. Rimuoviamo i dati utente
     localStorage.removeItem('user');
     localStorage.removeItem('isAdminAuthenticated');
     
-    // Torniamo alla home e ricarichiamo per resettare lo stato dell'app
-    navigate('/');
-    window.location.reload();
+    // 2. Evento per aggiornare altri componenti che ascoltano lo storage
+    window.dispatchEvent(new Event('storage'));
+    
+    // 3. Redirect alla home o login
+    navigate('/auth');
   };
 
   return (
-    <nav className="bg-white border-b border-gray-100 sticky top-0 z-[80] shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+    <motion.nav 
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      className="fixed top-0 left-0 right-0 bg-brand-cream/90 backdrop-blur-md z-40 py-3 px-4 md:px-6 border-b border-brand-dark/5 shadow-sm"
+    >
+      <div className="max-w-7xl mx-auto flex justify-between items-center">
         
-        {/* LOGO E NOME */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="bg-rose-600 p-2 rounded-xl group-hover:rotate-12 transition-transform shadow-lg shadow-rose-100">
-            <Pizza className="text-white" size={24} />
-          </div>
-          <div>
-            <h1 className="font-black uppercase italic text-gray-900 tracking-tighter leading-none text-xl">
-              Da Pakino
-            </h1>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Pizzeria & Grill</p>
+        {/* LOGO E BRAND */}
+        <Link to="/" className="flex items-center gap-2 md:gap-3 group">
+          <motion.img 
+            whileHover={{ rotate: -5, scale: 1.1 }}
+            src={logoSrc} 
+            alt="Da Pakino Logo" 
+            className="h-10 md:h-14 w-auto object-contain drop-shadow-sm"
+          />
+          <div className="hidden md:block leading-tight">
+            <h1 className="font-heading font-black text-brand-dark text-lg uppercase tracking-tight">Da Pakino</h1>
+            <p className="text-[10px] text-brand-dark/60 font-bold uppercase tracking-widest">Pizzeria D'asporto</p>
           </div>
         </Link>
 
+        {/* LINK CENTRALI (Desktop) */}
+        <div className="hidden md:flex items-center gap-8 font-heading font-bold text-brand-dark/70 uppercase tracking-wider text-xs lg:text-sm">
+          <NavLink to="/">Home</NavLink>
+          <NavLink to="/menu">Menu</NavLink>
+          {user && <NavLink to="/orders">I Miei Ordini</NavLink>}
+        </div>
+
         {/* AZIONI DESTRA */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-3 md:gap-4">
           
-          {/* SE LOGGATO: Mostra link Ordini, link Profilo e tasto Esci */}
           {user ? (
             <>
-              {/* Link ai Miei Ordini */}
-              <Link 
-                to="/orders" 
-                className="flex items-center gap-2 bg-gray-50 px-3 py-2.5 rounded-xl hover:bg-rose-50 hover:text-rose-600 transition-all border border-transparent hover:border-rose-100 group"
-              >
-                <ClipboardList size={18} className="text-gray-400 group-hover:text-rose-600" />
-                <span className="text-xs font-black uppercase text-gray-900 hidden md:inline">
-                  I miei ordini
-                </span>
+              {/* Tasto Profilo */}
+              <Link to="/profile" className="p-2 md:p-3 bg-white rounded-full text-brand-dark shadow-sm hover:text-brand-red transition-colors" title="Profilo">
+                <User size={20} />
               </Link>
 
-              {/* Link al Profilo/Account */}
-              <Link 
-                to="/profile" 
-                className="flex items-center gap-2 bg-gray-50 px-3 py-2.5 rounded-xl hover:bg-rose-50 hover:text-rose-600 transition-all border border-transparent hover:border-rose-100 group"
-              >
-                <UserCircle size={20} className="text-gray-400 group-hover:text-rose-600" />
-                <span className="text-xs font-black uppercase text-gray-900">
-                  {user.firstName}
-                </span>
-              </Link>
-
-              {/* Tasto Logout */}
+              {/* TASTO LOGOUT (NUOVO) */}
               <button 
                 onClick={handleLogout}
-                className="flex items-center justify-center p-2.5 bg-gray-100 text-gray-500 rounded-xl hover:bg-rose-100 hover:text-rose-600 transition-all group"
+                className="p-2 md:p-3 bg-white rounded-full text-brand-dark/60 shadow-sm hover:bg-brand-red hover:text-white transition-colors"
                 title="Esci"
               >
-                <LogOut size={20} className="group-hover:translate-x-0.5 transition-transform" />
+                <LogOut size={20} />
               </button>
             </>
           ) : (
-            /* SE NON LOGGATO: Mostra solo Accedi (se non admin) */
-            !isAdmin && (
-              <Link 
-                to="/auth" 
-                className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase hover:bg-rose-600 transition-all shadow-md active:scale-95"
-              >
-                Accedi
-              </Link>
-            )
+            /* Se non è loggato mostra Accedi */
+            <Link to="/auth" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-dark hover:text-brand-red transition-colors mr-2">
+              <LogIn size={16} /> <span className="hidden md:inline">Accedi</span>
+            </Link>
           )}
+          
+          {/* BOTTONE CARRELLO */}
+          <motion.button 
+            onClick={() => setIsCartOpen(true)}
+            whileTap={{ scale: 0.9 }}
+            className="relative p-3 md:p-4 bg-brand-red text-white rounded-full shadow-lg shadow-brand-red/30 hover:bg-brand-redDark transition-colors"
+          >
+            <motion.div whileHover={{ rotate: [0, -10, 10, -5, 5, 0] }}>
+              <ShoppingBag size={22} />
+            </motion.div>
 
-          {/* Fallback per Admin se necessario uscire senza essere "User" */}
-          {isAdmin && !user && (
-            <button 
-              onClick={handleLogout}
-              className="flex items-center gap-2 bg-gray-100 text-gray-500 px-4 py-2.5 rounded-xl hover:bg-rose-100 hover:text-rose-600 transition-all font-black text-xs uppercase"
-            >
-              <LogOut size={18} />
-              Esci Admin
-            </button>
-          )}
+            <AnimatePresence>
+              {cartCount > 0 && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  key={cartCount} 
+                  transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                  className="absolute -top-1 -right-1 bg-brand-gold text-brand-dark text-[10px] font-black h-5 w-5 md:h-6 md:w-6 flex items-center justify-center rounded-full border-2 border-brand-cream"
+                >
+                  {cartCount}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
         </div>
-
       </div>
-    </nav>
+    </motion.nav>
   );
+}
+
+// Helper per i link attivi
+function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
+  const location = useLocation();
+  const isActive = location.pathname === to;
+  
+  return (
+    <Link to={to} className="relative group py-2">
+      <span className={`transition-colors ${isActive ? 'text-brand-red' : 'group-hover:text-brand-red'}`}>
+        {children}
+      </span>
+      {isActive && (
+        <motion.div 
+          layoutId="nav-underline"
+          className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-red"
+        />
+      )}
+    </Link>
+  )
 }

@@ -1,5 +1,6 @@
 package com.dapakino.api.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty; // <--- AGGIUNGI QUESTO IMPORT
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -33,6 +34,11 @@ public class Product {
 
     private boolean available;
 
-    // NUOVO CAMPO
+    // --- CORREZIONE QUI ---
+    // Forziamo il nome del campo JSON per evitare errori di mapping
+    @JsonProperty("isMonthlySpecial")
+    @Column(name = "is_monthly_special") // Mappiamo correttamente sul DB
     private boolean isMonthlySpecial;
+
+
 }

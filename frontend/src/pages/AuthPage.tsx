@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Phone, ArrowRight, Pizza } from 'lucide-react'; // Rimossi User e MapPin se non usati o riaggiunti se servono
-import styles from './AuthPage.module.css';
+import styles from './AuthPage.module.css'
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,7 +19,29 @@ export default function AuthPage() {
     phone: ''
   });
 
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: credentialResponse.credential })
+      });
+
+      if (res.ok) {
+        const userData = await res.json();
+        localStorage.setItem('user', JSON.stringify(userData));
+        navigate('/'); // Login riuscito
+      } else {
+        setError("Errore login Google");
+      }
+    } catch (err) {
+      setError("Errore connessione server");
+    }
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +92,22 @@ export default function AuthPage() {
               {error}
             </div>
           )}
+          <div className="px-8 mt-6">
+           <p className="text-center text-xs font-bold text-gray-400 mb-4 uppercase">Oppure accedi con</p>
+           <div className="flex justify-center">
+             <GoogleLogin
+               onSuccess={handleGoogleSuccess}
+               onError={() => setError('Login fallito')}
+               theme="filled_black"
+               shape="pill"
+               text={isLogin ? "signin_with" : "signup_with"}
+             />
+           </div>
+           <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
+              <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-gray-400">O usa la mail</span></div>
+           </div>
+          </div>
 
           {!isLogin && (
             <div className="grid grid-cols-2 gap-3">

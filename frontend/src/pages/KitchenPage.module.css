@@ -1,0 +1,134 @@
+.container {
+  @apply min-h-screen bg-gray-900 text-white font-sans p-4;
+}
+
+/* Header */
+.header {
+  @apply flex justify-between items-center mb-6 bg-gray-800 p-4 rounded-2xl border border-gray-700 shadow-lg;
+}
+
+.headerTitle {
+  @apply flex items-center gap-3;
+}
+
+.headerIcon {
+  @apply bg-rose-600 p-2 rounded-xl text-white;
+}
+
+.titleText {
+  @apply text-xl font-black uppercase tracking-widest;
+}
+
+.headerActions {
+  @apply flex gap-2;
+}
+
+.menuButton {
+  @apply flex items-center gap-2 bg-blue-600 hover:bg-blue-500 px-4 py-3 rounded-xl font-bold text-xs uppercase transition-colors;
+}
+
+.iconButton {
+  @apply p-3 bg-gray-700 hover:bg-gray-600 rounded-xl transition-colors;
+}
+
+.logoutButton {
+  @apply p-3 bg-rose-600 hover:bg-rose-700 rounded-xl transition-colors;
+}
+
+/* CORREZIONE QUI: Rinomina .grid in .ordersGrid */
+.ordersGrid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+}
+
+/* Card Base */
+.card {
+  @apply rounded-[2rem] p-5 border-2 flex flex-col justify-between h-full relative overflow-hidden transition-all;
+}
+
+/* Varianti Card */
+.cardDefault {
+  @apply bg-gray-800 border-gray-600;
+}
+.cardPrep {
+  @apply bg-amber-950/30 border-amber-500;
+}
+.cardDelivery {
+  @apply bg-blue-950/30 border-blue-500;
+}
+
+/* Badge Stato */
+.statusBadge {
+  @apply absolute top-0 right-0 px-4 py-1 rounded-bl-2xl font-black text-[10px] uppercase tracking-widest;
+}
+.badgeDefault { @apply bg-gray-600 text-gray-300; }
+.badgePrep { @apply bg-amber-500 text-gray-900; }
+.badgeDelivery { @apply bg-blue-500 text-white; }
+
+/* Contenuto Card */
+.timeRow {
+  @apply flex items-center justify-between border-b border-gray-700 pb-3;
+}
+
+.orderId {
+  @apply text-xs font-bold text-gray-500;
+}
+
+.detailsBox {
+  @apply bg-gray-900/50 p-3 rounded-xl border border-gray-700/50;
+}
+
+.iconsRow {
+  @apply flex gap-3 mb-2 border-b border-gray-700 pb-2;
+}
+
+.detailsText {
+  @apply whitespace-pre-wrap font-mono text-sm leading-relaxed text-gray-300;
+}
+
+/* Azioni Footer */
+.actionsFooter {
+  @apply mt-5 pt-4 border-t border-gray-700/50 space-y-2;
+}
+
+/* Bottoni Azione */
+.rejectConfirm {
+  @apply bg-rose-900/50 p-3 rounded-xl border border-rose-500;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.rejectText {
+  @apply text-center text-rose-200 text-xs font-bold mb-2;
+}
+
+.buttonGroup {
+  @apply flex gap-2;
+}
+
+.btnCancel {
+  @apply flex-1 bg-gray-700 py-2 rounded-lg text-xs font-bold hover:bg-gray-600;
+}
+
+.btnConfirmReject {
+  @apply flex-1 bg-rose-600 py-2 rounded-lg text-xs font-bold hover:bg-rose-500;
+}
+
+.btnReject {
+  @apply bg-gray-700 hover:bg-rose-900 hover:text-rose-200 text-gray-400 font-bold py-3 px-4 rounded-xl text-xs transition-colors;
+}
+
+.btnAccept {
+  @apply flex-1 bg-green-500 hover:bg-green-400 text-white font-black py-3 rounded-xl uppercase flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg;
+}
+
+.btnDeliver {
+  @apply w-full bg-blue-500 hover:bg-blue-400 text-white font-black py-3 rounded-xl uppercase flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg;
+}
+
+.btnComplete {
+  @apply w-full bg-gray-700 hover:bg-green-600 text-white font-black py-3 rounded-xl uppercase flex items-center justify-center gap-2 transition-all active:scale-95;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
