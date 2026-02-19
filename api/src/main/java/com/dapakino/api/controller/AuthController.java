@@ -67,29 +67,31 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping("/register")
+ @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
-        // 1. Controllo se esiste già
+        // 1. Controllo se l'email esiste già
         if(userRepository.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email già registrata!");
         }
 
-        // 2. RIEMPIAMO I CAMPI MANCANTI (Il fix per l'errore 500)
+        // 2. RIEMPIAMO I CAMPI MANCANTI OBBLIGATORI
         if (user.getAddress() == null) {
-            user.setAddress(""); // Mettiamo una stringa vuota invece di null
+            user.setAddress(""); 
         }
         if (user.getPhone() == null) {
-            user.setPhone("");   // Mettiamo una stringa vuota invece di null
+            user.setPhone("");   
+        }
+        if (user.getCity() == null) {
+            user.setCity(""); // Aggiungo anche city visto che c'è nell'insert SQL
         }
         
-        // Se hai altri campi nel database (es. role, city), inizializzali qui!
-        // Esempio: user.setRole("USER");
-        
+        // ECCO IL FIX: Assegniamo il ruolo di default!
+        user.setRole("USER"); // Cambia "USER" se usi un termine diverso (es. "CUSTOMER")
+
         // 3. Salvataggio
         try {
             return ResponseEntity.ok(userRepository.save(user));
         } catch (Exception e) {
-            // Questo stamperà il vero errore nei log se succede ancora
             e.printStackTrace(); 
             return ResponseEntity.status(500).body("Errore nel salvataggio: " + e.getMessage());
         }
