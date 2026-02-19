@@ -29,6 +29,10 @@ public class User {
     private String city;
     private String phone;
 
+    // ECCO LA RIGA MAGICA CHE RISOLVE TUTTO!
+    @Column(nullable = false)
+    private String role = "USER";
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore // <--- QUESTO È FONDAMENTALE! BLOCCA IL LOOP INFINITO
     private List<Order> orders;
