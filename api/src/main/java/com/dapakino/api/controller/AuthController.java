@@ -69,11 +69,30 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
+        // 1. Controllo se esiste già
         if(userRepository.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email già registrata!");
         }
-        // In un caso reale qui useremmo BCrypt per criptare la password
-        return ResponseEntity.ok(userRepository.save(user));
+
+        // 2. RIEMPIAMO I CAMPI MANCANTI (Il fix per l'errore 500)
+        if (user.getAddress() == null) {
+            user.setAddress(""); // Mettiamo una stringa vuota invece di null
+        }
+        if (user.getPhone() == null) {
+            user.setPhone("");   // Mettiamo una stringa vuota invece di null
+        }
+        
+        // Se hai altri campi nel database (es. role, city), inizializzali qui!
+        // Esempio: user.setRole("USER");
+        
+        // 3. Salvataggio
+        try {
+            return ResponseEntity.ok(userRepository.save(user));
+        } catch (Exception e) {
+            // Questo stamperà il vero errore nei log se succede ancora
+            e.printStackTrace(); 
+            return ResponseEntity.status(500).body("Errore nel salvataggio: " + e.getMessage());
+        }
     }
 
     @PostMapping("/login")
